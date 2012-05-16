@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * Implements hook_block_info().
+ */
+function share_light_block_info() {
+	$blocks = array();
+	$blocks['current_page'] = array(
+		'info' => t('Share this page'),
+		'cache' => DRUPAL_CACHE_PER_PAGE,
+	);
+	return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ * @param string $path to the page - current url will be used if empty
+ * @param array $options additional overrides for default options
+ * @return renderable array
+ */
+function share_light_block_view($id, $path = NULL, $options = array()) {
+	$v = array();
+	$v['subject'] = isset($options['subject']) ? t($options['subject']) : t('Share this page!');
+	
+	$links = array();
+	$l = array();
+	$title = isset($options['title']) ? $options['title'] : drupal_get_title();
+	
+	if (!$path) $path = current_path();
+	$url = url($path, array('absolute' => TRUE));
+	
+	$l['facebook'] = array('Facebook', 'https://www.facebook.com/sharer.php', array('u' => $url, 't' => $title));
+	$l['twitter'] = array('Twitter', 'http://twitter.com/home', array('status' => $url));
+	$l['forward'] = array('E-Mail', 'forward', array('path' => $path));
+	foreach ($l as $k => $v) {
+		$links[$k] = array(
+			'title' => "<span>{$v[0]}</span>",
+			'href' => $v[1],
+			'query' => $v[2],
+			'html' => TRUE,
+			'attributes' => array('target' => '_blank'),
+		);
+	}
+	$v['content'] = array(
+		'#theme' => 'links',
+		'#links' => $links,
+		'#attributes' => array('class' => array('share-light')),
+	);
+	
+	return $v;
+}
