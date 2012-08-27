@@ -28,14 +28,14 @@ function share_light_block_view($id, $path = NULL, $options = array()) {
 	if (!$path) $path = current_path();
 	$url = url($path, array('absolute' => TRUE));
 
-    // if exit is set valid, use this to generate the URL to share
+    // if share is set valid, use this to generate the URL to share
     // overrides any previously defined paths/urls
-    if (isset($_GET['exit'])) {
-        $exit_url = $_GET['exit'];
-        if (valid_url($exit_url, TRUE)) { // if absolute url: use it
-            $url = $exit_url;
-        } else if (valid_url($exit_url, FALSE)) { // if its an relative path, generate it
-            $path = $exit_url;
+    if (isset($_GET['share'])) {
+        $share_url = $_GET['share'];
+        if (valid_url($share_url, TRUE)) { // if absolute url: use it
+            $url = $share_url;
+        } else if (valid_url($share_url, FALSE)) { // if its an relative path, generate it
+            $path = $share_url;
 	        $url = url($path, array('absolute' => TRUE));
         }
     }
