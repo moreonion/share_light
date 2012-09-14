@@ -27,6 +27,14 @@ function share_light_block_view($id, $path = NULL, $options = array()) {
 	
 	if (!$path) $path = current_path();
 	$url = url($path, array('absolute' => TRUE));
+	
+	if (($node = menu_get_object()) && $node->nid) {
+	  $field = field_get_items('node', $node, 'field_share_light');
+	  if ($field && count($field) && !$field[0]['value']) {
+	    return NULL;
+	  }
+	}
+	
 
     // if share is set valid, use this to generate the URL to share
     // overrides any previously defined paths/urls
