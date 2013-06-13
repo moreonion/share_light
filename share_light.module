@@ -4,12 +4,12 @@
  * Implements hook_block_info().
  */
 function share_light_block_info() {
-	$blocks = array();
-	$blocks['current_page'] = array(
-		'info' => t('Share this page'),
-		'cache' => DRUPAL_CACHE_PER_PAGE,
-	);
-	return $blocks;
+  $blocks = array();
+  $blocks['current_page'] = array(
+    'info' => t('Share this page'),
+    'cache' => DRUPAL_CACHE_PER_PAGE,
+  );
+  return $blocks;
 }
 
 /**
@@ -19,75 +19,72 @@ function share_light_block_info() {
  * @return renderable array
  */
 function share_light_block_view($id, $path = NULL, $options = array()) {
-	$v = array();
-	$v['subject'] = isset($options['subject']) ? t($options['subject']) : t('Share this page!');
-	
-	$links = array();
-	$title = isset($options['title']) ? $options['title'] : drupal_get_title();
-	
-	if (!$path) $path = current_path();
-	$url = url($path, array('absolute' => TRUE));
-	
-	if (($node = menu_get_object()) && $node->nid) {
-	  $field = field_get_items('node', $node, 'field_share_light');
-	  if ($field && count($field) && !$field[0]['value']) {
-	    return NULL;
-	  }
-	}
-	
+  $v = array();
+  $v['subject'] = isset($options['subject']) ? t($options['subject']) : t('Share this page!');
 
-    // if share is set valid, use this to generate the URL to share
-    // overrides any previously defined paths/urls
-    if (isset($_GET['share'])) {
-        $share_url = $_GET['share'];
-        if (valid_url($share_url, TRUE)) { // if absolute url: use it
-            $url = $share_url;
-            // since we do not want to scrape the title from the (most likely) remote page...
-            if(isset($title)) {
-                $title = '[shared via] ' . $title;
-            }
-        } else if (valid_url($share_url, FALSE)) { // if its an relative path, generate it
-            $path = $share_url;
-	        $url = url($path, array('absolute' => TRUE));
-            // get the title to the shared page and override the prev set $title
-            $p = drupal_get_normal_path($path);
-            $node = menu_get_object('node', 1, $p);
-            if($node) {
-                $title = $node->title;
-            }
-        }
+  $links = array();
+  $title = isset($options['title']) ? $options['title'] : drupal_get_title();
+
+  if (!$path) $path = current_path();
+  $url = url($path, array('absolute' => TRUE));
+
+  if (($node = menu_get_object()) && $node->nid) {
+    $field = field_get_items('node', $node, 'field_share_light');
+    if ($field && count($field) && !$field[0]['value']) {
+      return NULL;
     }
-	
-	$links['facebook'] = array(
-		'title' => 'Facebook',
-		'href' => 'https://www.facebook.com/sharer.php',
-		'query' => array('u' => $url, 't' => $title), 
-		'attributes' => array('title' => t('Share this via Facebook!'))
-	);
-	$links['twitter'] = array(
-		'title' => 'Twitter',
-		'href' => 'http://twitter.com/home', 
-		'query' => array('status' => $url), 
-		'attributes' => array('title' => t('Share this via Twitter!'))
-	);
-	$links['forward'] = array(
-		'title' => 'E-Mail',
-		'href' => 'forward', 
-		'query' => array('path' => $path), 
-		'attributes' => array('title' => t('Share this via E-Mail!'))
-	);
-	
-	foreach ($links as &$x) {
-		$x['title'] = "<span>{$x['title']}</span>";
-		$x['html'] = TRUE;
-		$x['attributes']['target'] = '_blank';
-		
-	}
-	$v['content'] = array(
-		'#theme' => 'links',
-		'#links' => $links,
-		'#attributes' => array('class' => array('share-light')),
-	);
-	
-	return $v;
+  }
+
+  // if share is set valid, use this to generate the URL to share
+  // overrides any previously defined paths/urls
+  if (isset($_GET['share'])) {
+    $share_url = $_GET['share'];
+    if (valid_url($share_url, TRUE)) { // if absolute url: use it
+      $url = $share_url;
+      // since we do not want to scrape the title from the (most likely) remote page...
+      if(isset($title)) {
+        $title = '[shared via] ' . $title;
+      }
+    } else if (valid_url($share_url, FALSE)) { // if its an relative path, generate it
+      $path = $share_url;
+      $url = url($path, array('absolute' => TRUE));
+      // get the title to the shared page and override the prev set $title
+      $p = drupal_get_normal_path($path);
+      $node = menu_get_object('node', 1, $p);
+      if($node) {
+        $title = $node->title;
+      }
+    }
+  }
+
+  $links['facebook'] = array(
+    'title' => 'Facebook',
+    'href' => 'https://www.facebook.com/sharer.php',
+    'query' => array('u' => $url, 't' => $title),
+    'attributes' => array('title' => t('Share this via Facebook!'))
+  );
+  $links['twitter'] = array(
+    'title' => 'Twitter',
+    'href' => 'http://twitter.com/home',
+    'query' => array('status' => $url),
+    'attributes' => array('title' => t('Share this via Twitter!'))
+  );
+  $links['forward'] = array(
+    'title' => 'E-Mail',
+    'href' => 'forward',
+    'query' => array('path' => $path),
+    'attributes' => array('title' => t('Share this via E-Mail!'))
+  );
+
+  foreach ($links as &$x) {
+    $x['title'] = "<span>{$x['title']}</span>";
+    $x['html'] = TRUE;
+    $x['attributes']['target'] = '_blank';
+  }
+  $v['content'] = array(
+    '#theme' => 'links',
+    '#links' => $links,
+    '#attributes' => array('class' => array('share-light')),
+  );
+  return $v;
 }
