@@ -5,6 +5,7 @@
  */
 function share_light_block_info() {
   $blocks = array();
+
   $blocks['current_page'] = array(
     'info' => t('Share this page'),
     'cache' => DRUPAL_CACHE_PER_PAGE,
@@ -31,7 +32,7 @@ function share_light_block_view($id, $path = NULL, $options = array()) {
   if (($node = menu_get_object()) && $node->nid) {
     // if there is a defined entry for the share_light toggle field use this
     // otherwise check for the share_light default behaviour variable
-    $field = field_get_items('node', $node, 'field_share_light');
+    $field = field_get_items('node', $node, 'share_light_toggle');
     if ($field && count($field)) {
       if (!$field[0]['value']) {
         return NULL;
@@ -39,6 +40,7 @@ function share_light_block_view($id, $path = NULL, $options = array()) {
     } elseif (variable_get('share_light_default_toggle', '1') == '0') {
       return NULL;
     }
+
   }
 
   // if share is set valid, use this to generate the URL to share
@@ -93,4 +95,17 @@ function share_light_block_view($id, $path = NULL, $options = array()) {
     '#attributes' => array('class' => array('share-light')),
   );
   return $v;
+}
+
+/**
+ * Implements HOOK_block_view_MODULE_DELTA_alter().
+ */
+function share_light_block_view_share_light_current_page_alter($data, $block) {
+  if (($node = menu_get_object()) && $node->nid) {
+    // use field share_light_title to override default block title
+    $field_title = field_get_items('node', $node, 'share_light_title');
+    if ($field_title && count($field_title) && $field_title[0]['value']) {
+      $block->title = $field_title[0]['value'];
+    }
+  }
 }

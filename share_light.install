@@ -2,6 +2,26 @@
 
 function share_light_install() {
   share_light_update_1;
+  share_light_update_2;
+}
+
+/**
+ * Define field haupt_seite_toggle. Use utility function to add instance.
+ */
+function share_light_update_2() {
+  $field = array (
+    'global_block_settings' => '1',
+    'field_name' => 'share_light_title',
+    'settings' => array (
+      'max_length' => '255',
+    ),
+    'type' => 'text',
+    'module' => 'text',
+    'active' => '1',
+    'cardinality' => '1',
+    'deleted' => '0',
+  );
+  field_create_field($field);
 }
 
 /**
@@ -29,6 +49,35 @@ function share_light_update_1() {
  * Utility function that let's you conveniently add instances
  * of the haupt_seite_toggle field to your content-type.
  */
+function _share_light_add_field_share_light_title($bundle) {
+  $instance = array (
+    'bundle' => $bundle,
+    'label' => 'Share box title text',
+    'widget' => array (
+      'weight' => '8',
+      'type' => 'text_textfield',
+      'module' => 'text',
+      'active' => 1,
+      'settings' => array (
+        'size' => '60',
+      ),
+    ),
+    'display' => array (
+      'default' => array (
+        'label' => 'hidden',
+        'type' => 'hidden',
+      ),
+    ),
+    'required' => 0,
+    'description' => '',
+    'exclude_cv' => 0,
+    'field_name' => 'share_light_title',
+    'entity_type' => 'node',
+  );
+
+  field_create_instance($instance);
+}
+
 function _share_light_add_field_to_node_type($bundle) {
   $instance = array (
     'bundle' => $bundle,
