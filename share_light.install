@@ -1,0 +1,60 @@
+<?php
+
+function share_light_install() {
+  share_light_update_1;
+}
+
+/**
+ * Define field haupt_seite_toggle. Use utility function to add instance.
+ */
+function share_light_update_1() {
+  $field = array (
+    'global_block_settings' => '1',
+    'field_name' => 'share_light_toggle',
+    'settings' => array (
+      'allowed_values' => array (
+        0 => '',
+        1 => '',
+      ),
+    ),
+    'type' => 'list_boolean',
+    'module' => 'list',
+    'active' => '1',
+    'cardinality' => '1',
+    'deleted' => '0',
+  );
+  field_create_field($field);
+}
+/**
+ * Utility function that let's you conveniently add instances
+ * of the haupt_seite_toggle field to your content-type.
+ */
+function _share_light_add_field_to_node_type($bundle) {
+  $instance = array (
+    'bundle' => $bundle,
+    'label' => 'Display share box.',
+    'widget' => array (
+      'weight' => '7',
+      'type' => 'options_onoff',
+      'module' => 'options',
+      'active' => 1,
+      'settings' => array (
+        'display_label' => 1,
+      ),
+    ),
+    'display' => array (
+      'default' => array (
+        'label' => 'hidden',
+        'type' => 'hidden',
+      ),
+    ),
+    'required' => 0,
+    'description' => 'Enable to display a share box.',
+    'exclude_cv' => 0,
+    'field_name' => 'share_light_toggle',
+    'entity_type' => 'node',
+  );
+
+  field_create_instance($instance);
+}
+
