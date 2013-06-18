@@ -6,6 +6,17 @@ function share_light_install() {
 }
 
 /**
+ * field_share_light -> share_light_toggle
+ */
+function share_light_update_3() {
+  db_query("UPDATE {field_config_instance} SET field_name='share_light_toggle', field_id=(SELECT id from {field_config} WHERE field_name='share_light_toggle') WHERE field_name='field_share_light'");
+  db_query("INSERT INTO {field_data_share_light_toggle} SELECT * FROM {field_data_field_share_light}");
+  db_query("INSERT INTO {field_revision_share_light_toggle} SELECT * FROM {field_revision_field_share_light");
+  db_query("DELETE FROM {field_data_field_share_light}");
+  db_query("DELETE FROM {field_revision_field_share_light}");
+}
+
+/**
  * Define field haupt_seite_toggle. Use utility function to add instance.
  */
 function share_light_update_2() {
