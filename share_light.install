@@ -1,8 +1,8 @@
 <?php
 
 function share_light_install() {
-  share_light_update_1;
-  share_light_update_2;
+  share_light_update_1();
+  share_light_update_2();
 }
 
 /**
