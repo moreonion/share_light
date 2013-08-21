@@ -19,15 +19,21 @@ function share_light_block_info() {
  * @param array $options additional overrides for default options
  * @return renderable array
  */
-function share_light_block_view($id, $path = NULL, $options = array()) {
+function share_light_block_view($id, $link = NULL, $options = array()) {
   $v = array();
   $v['subject'] = isset($options['subject']) ? t($options['subject']) : t('Share this page!');
 
   $links = array();
   $title = isset($options['title']) ? $options['title'] : drupal_get_title();
 
-  if (!$path) $path = current_path();
-  $url = url($path, array('absolute' => TRUE));
+  if (!is_array($link)) {
+    if (is_string($link)) {
+      $link = array('path' => $link);
+    } else {
+      $link = array('path' => current_path());
+    }
+  }
+  $url = url($link['path'], $link + array('absolute' => TRUE));
 
   if (($node = menu_get_object()) && $node->nid) {
     // if there is a defined entry for the share_light toggle field use this
@@ -58,16 +64,17 @@ function share_light_block_view($id, $path = NULL, $options = array()) {
         $title = '[shared via] ' . $title;
       }
     } else if (valid_url($share_url, FALSE)) { // if its an relative path, generate it
-      $path = $share_url;
-      $url = url($path, array('absolute' => TRUE));
+      $link['path'] = $share_url;
+      $url = url($link['path'], array('absolute' => TRUE));
       // get the title to the shared page and override the prev set $title
-      $p = drupal_get_normal_path($path);
+      $p = drupal_get_normal_path($link['path']);
       $node = menu_get_object('node', 1, $p);
       if($node) {
         $title = $node->title;
       }
     }
   }
+  $url = urlencode($url);
 
   $links['facebook'] = array(
     'title' => 'Facebook',
@@ -84,7 +91,7 @@ function share_light_block_view($id, $path = NULL, $options = array()) {
   $links['forward'] = array(
     'title' => 'E-Mail',
     'href' => 'forward',
-    'query' => array('path' => $path),
+    'query' => array('path' => $link['path']),
     'attributes' => array('title' => t('Share this via E-Mail!'))
   );
 
