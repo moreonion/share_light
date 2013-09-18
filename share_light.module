@@ -74,12 +74,11 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
       }
     }
   }
-  $url = urlencode($url);
 
   $links['facebook'] = array(
     'title' => 'Facebook',
     'href' => 'https://www.facebook.com/sharer.php',
-    'query' => array('u' => $url, 't' => $title),
+    'query' => array('u' => urlencode($url), 't' => $title),
     'attributes' => array('title' => t('Share this via Facebook!'))
   );
   $links['twitter'] = array(
