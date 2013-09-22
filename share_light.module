@@ -90,7 +90,7 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   $links['forward'] = array(
     'title' => 'E-Mail',
     'href' => 'forward',
-    'query' => array('path' => $link['path']),
+    'query' => array('path' => $link['path'], 'query' => $link['query']),
     'attributes' => array('title' => t('Share this via E-Mail!'))
   );
 
