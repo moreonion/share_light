@@ -35,7 +35,9 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   }
   $url = url($link['path'], $link + array('absolute' => TRUE));
 
+  $self = NULL;
   if (($node = menu_get_object()) && $node->nid) {
+    $self = $node;
     // if there is a defined entry for the share_light toggle field use this
     // otherwise check for the share_light default behaviour variable
     $field = field_get_items('node', $node, 'share_light_toggle');
@@ -53,10 +55,26 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
 
   }
 
-  // if share is set valid, use this to generate the URL to share
-  // overrides any previously defined paths/urls
   if (isset($_GET['share'])) {
     $share_url = $_GET['share'];
+  }
+
+  $check_url = (isset($share_url) && !empty($share_url)) ? $share_url : $url;
+
+  // call hook_share_light_alter to override the share_url
+  // you can determine whether to override in the hook
+  // use this for further customizations
+  $results = module_invoke_all('share_light_alter', $self, $check_url);
+  if (isset($results[0]) && !empty($results[0])) {
+    $share_url = $results[0];
+  }
+  if (isset($results[1]) && !empty($results[1])) {
+    $title = $results[1];
+  }
+
+  // if share is set valid, use this to generate the URL to share
+  // overrides any previously defined paths/urls
+  if (!empty($share_url)) {
     if (valid_url($share_url, TRUE)) { // if absolute url: use it
       $url = $share_url;
       // since we do not want to scrape the title from the (most likely) remote page...
