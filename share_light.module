@@ -65,11 +65,11 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   // you can determine whether to override in the hook
   // use this for further customizations
   $results = module_invoke_all('share_light_alter', $self, $check_url);
-  if (isset($results[0]) && !empty($results[0])) {
-    $share_url = $results[0];
+  if (isset($results['url']) && !empty($results['url'])) {
+    $share_url = $results['url'];
   }
-  if (isset($results[1]) && !empty($results[1])) {
-    $title = $results[1];
+  if (isset($results['title']) && !empty($results['title'])) {
+    $title = $results['title'];
   }
 
   // if share is set valid, use this to generate the URL to share
