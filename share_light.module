@@ -1,6 +1,30 @@
 <?php
 
 /**
+ * Implements hook_menu().
+ */
+function share_light_menu() {
+  // implement a special node-share page on behalf
+  // of forward.module
+  $items['node/%node/forward'] = array(
+    'title'            => variable_get('forward_email_title', 'Forward this page to a friend'),
+    'page callback'    => 'share_light_forward_page',
+    'page arguments'   => array(1),
+    'access arguments' => array('access forward'),
+    'type'             => MENU_CALLBACK
+  );
+  return $items;
+}
+
+/**
+ * Page callback for node/%/forward
+ */
+function share_light_forward_page($node) {
+  $_GET['path'] = 'node/' . $node->nid;
+  return forward_page();
+}
+
+/**
  * Implements hook_block_info().
  */
 function share_light_block_info() {
@@ -109,12 +133,23 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   if (isset($link['query'])) {
     $query['query'] = $link['query'];
   }
-  $links['forward'] = array(
-    'title' => 'E-Mail',
-    'href' => 'forward',
-    'query' => $query,
-    'attributes' => array('title' => t('Share this via E-Mail!'))
-  );
+  $parts = explode('/', $query['path']);
+  if (count($parts) == 2 && $parts[0] == 'node' && is_numeric($parts[1])) {
+    unset($query['path']);
+    $links['forward'] = array(
+      'title' => 'E-Mail',
+      'href' => $link['path'] . '/forward',
+      'query' => $query,
+      'attributes' => array('title' => t('Share this via E-Mail!'))
+    );
+  } else {
+    $links['forward'] = array(
+      'title' => 'E-Mail',
+      'href' => 'forward',
+      'query' => $query,
+      'attributes' => array('title' => t('Share this via E-Mail!'))
+    );
+  }
 
   foreach ($links as &$x) {
     $x['title'] = "<span>{$x['title']}</span>";
@@ -141,3 +176,4 @@ function share_light_block_view_share_light_current_page_alter($data, $block) {
     }
   }
 }
+
