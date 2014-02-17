@@ -114,21 +114,30 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   $self = NULL;
   if (($node = menu_get_object()) && $node->nid) {
     $self = $node;
-    // if there is a defined entry for the share_light toggle field use this
-    // otherwise check for the share_light default behaviour variable
-    $field = field_get_items('node', $node, 'share_light_toggle');
-    // check for remaining "old" fields (former field name)
-    if (!$field || !count($field)) {
-      $field = field_get_items('node', $node, 'field_share_light');
-    }
-    if ($field && count($field)) {
-      if (!$field[0]['value']) {
+    // use new field if present, try the old one otherwise
+    $share_light_fields = _share_light_field_instances('node', $node, 'share_light');
+    $share_light_field = array_shift($share_light_fields);
+    if (isset($share_light_field['toggle'])) {
+      if ($share_light_field['toggle'] == '0') {
+        // do not display the block
         return NULL;
       }
-    } elseif (variable_get('share_light_default_toggle', '1') == '0') {
-      return NULL;
+    } else {
+      // if there is a defined entry for the share_light toggle field use this
+      // otherwise check for the share_light default behaviour variable
+      $field = field_get_items('node', $node, 'share_light_toggle');
+      // check for remaining "old" fields (former field name)
+      if (!$field || !count($field)) {
+        $field = field_get_items('node', $node, 'field_share_light');
+      }
+      if ($field && count($field)) {
+        if (!$field[0]['value']) {
+          return NULL;
+        }
+      } elseif (variable_get('share_light_default_toggle', '1') == '0') {
+        return NULL;
+      }
     }
-
   }
 
   if (isset($_GET['share'])) {
@@ -171,10 +180,14 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
 
   // get enabled channels
   $channels = variable_get('share_light_enabled_channels', array_keys(_share_light_channels()));
+  // display the enabled channels
   foreach ($channels as $channel_name => $channel_value) {
     if ($channel_value) {
-      $call_name = '_share_light_channel_' . $channel_name;
-      $links[$channel_name] = $call_name($channel_name, $channel_value, $url, $title, $link);
+      if (!isset($share_light_field['options']['channel_'.$channel_name.'_toggle']) ||
+          $share_light_field['options']['channel_'.$channel_name.'_toggle'] == 1) {
+        $call_name = '_share_light_channel_' . $channel_name;
+        $links[$channel_name] = $call_name($channel_name, $channel_value, $url, $title, $share_light_field, $link);
+      }
     }
   }
 
@@ -204,23 +217,27 @@ function share_light_block_view_share_light_current_page_alter($data, $block) {
   }
 }
 
-function _share_light_channel_facebook($channel_name, $channel_value, $url, $title, $link) {
+function _share_light_channel_facebook($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
   return array(
     'title' => 'Facebook',
     'href' => 'https://www.facebook.com/sharer.php',
-    'query' => array('u' => urlencode($url), 't' => $title),
+    'query' => array('u' => urlencode($url)),
     'attributes' => array('title' => t('Share this via Facebook!'))
   );
 }
-function _share_light_channel_twitter($channel_name, $channel_value, $url, $title, $link) {
+function _share_light_channel_twitter($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
+  $text = $url;
+  if (!empty($share_light_field['options']['channel_'.$channel_name.'_text'])) {
+    $text = $share_light_field['options']['channel_'.$channel_name.'_text'] . ' ' . $url;
+  }
   return array(
     'title' => 'Twitter',
     'href' => 'http://twitter.com/home',
-    'query' => array('status' => $url),
+    'query' => array('status' => $text),
     'attributes' => array('title' => t('Share this via Twitter!'))
   );
 }
-function _share_light_channel_forward($channel_name, $channel_value, $url, $title, $link) {
+function _share_light_channel_forward($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
   $query['path'] = $link['path'];
   if (isset($link['query'])) {
     $query['query'] = $link['query'];
@@ -242,4 +259,160 @@ function _share_light_channel_forward($channel_name, $channel_value, $url, $titl
       'attributes' => array('title' => t('Share this via E-Mail!'))
     );
   }
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function share_light_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $item = isset($items[$delta]) ? $items[$delta] : array();
+  if (isset($instance['default_value'][$delta]) && !isset($items[$delta])) {
+    $item = $instance['default_value'][$delta];
+  }
+
+  $default_channels = _share_light_channels();
+  $channels = variable_get('share_light_enabled_channels', $default_channels);
+
+  $channel_default_values = array();
+  foreach ($default_channels as $channel_name => $channel_value) {
+    $channel_default_values['channel_'.$channel_name.'_toggle'] = $channels[$channel_name] ? 1 : 0;
+    $channel_default_values['channel_'.$channel_name.'_text'] = '';
+  }
+
+  $defaults = array(
+    'toggle' => variable_get('share_light_default_toggle', '1'),
+    'options' => $channel_default_values,
+  );
+
+  $item = drupal_array_merge_deep($defaults, $item);
+
+  $element['toggle'] = array(
+    '#title' => t('Display a share block.'),
+    '#description' => t('Display a share block.'),
+    '#type' => 'checkbox',
+    '#default_value' => $item['toggle'],
+  );
+  $element['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Share advanced settings.'),
+    '#states' => array(
+      'visible' => array(
+        '#edit-'.strtr($field['field_name'], '_', '-').'-'.$langcode.'-'.$delta.'-toggle' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  foreach ($channels as $channel_name => $channel_value) {
+    $title = $default_channels[$channel_name];
+    $element['options']['channel_'.$channel_name.'_toggle'] = array(
+      '#title' => t('Enable '.$title.' on this page.'),
+      '#description' => t('Enable '.$title.' on this page.'),
+      '#type' => 'checkbox',
+      '#default_value' => $item['options']['channel_'.$channel_name.'_toggle'],
+      '#access' => $channel_value ? TRUE : FALSE,
+    );
+    $element['options']['channel_'.$channel_name.'_text'] = array(
+      '#title' => t('Share text for ' . $title . '.'),
+      '#description' => ('Share text for ' . $title . '.'),
+      '#type' => 'textfield',
+      '#size' => 60,
+      '#maxlength' => 255,
+      '#attributes' => array(),
+      '#default_value' => $item['options']['channel_'.$channel_name.'_text'],
+      '#access' => $channel_value ? TRUE : FALSE,
+    );
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_info().
+ */
+function share_light_field_info() {
+  $info['share_light'] = array(
+    'label' => t('Share light'),
+    'description' => t('Allows you to display a share block.'),
+    'settings' => array('style' => NULL),
+    'default_widget' => 'share_light',
+    'default_formatter' => 'share_light',
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function share_light_field_widget_info() {
+  $info['share_light'] = array(
+    'label' => t('Share light'),
+    'field types' => array('share_light'),
+    'settings' => array('size' => 60),
+    'behaviors' => array(
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+      'default values' => FIELD_BEHAVIOR_DEFAULT,
+    ),
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function share_light_field_formatter_info() {
+  $info['share_light'] = array(
+    'label' => 'Share light',
+    'field types' => array('share_light'),
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_field_presave().
+ */
+function share_light_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
+  if ($field['type'] == 'share_light') {
+    foreach ($items as &$item) {
+      $item['options'] = serialize($item['options']);
+    }
+  }
+}
+
+/**
+ * Implements hook_field_load().
+ */
+function share_light_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
+  if ($field['type'] == 'share_light') {
+    foreach ($entities as $id => $entity) {
+      foreach ($items[$id] as &$item) {
+        $item['options'] = unserialize($item['options']);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function share_light_field_is_empty($item, $field) {
+  return FALSE;
+}
+
+/**
+ * utility function: returns all field items by field type in array
+ * (indexed by field name)
+ */
+function _share_light_field_instances($entity_type, $node, $field_type) {
+  $instances = field_info_instances($entity_type, $node->type);
+  $fields = array();
+  foreach ($instances as $instance) {
+    $field_info = field_info_field($instance['field_name']);
+    if ($field_info['type'] == $field_type) {
+      $item = field_get_items($entity_type, $node, $instance['field_name']);
+      if ($item) {
+        $fields[$instance['field_name']] = $item[0];
+      }
+    }
+  }
+  return $fields;
 }

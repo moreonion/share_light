@@ -118,3 +118,24 @@ function _share_light_add_field_to_node_type($bundle) {
   field_create_instance($instance);
 }
 
+/**
+ * Implements hook_field_schema().
+ */
+function share_light_field_schema($field) {
+  if ($field['type'] == 'share_light') {
+    $columns['options'] = array(
+      'type' => 'blob',
+      'not null' => FALSE,
+      'serialize' => TRUE,
+    );
+    $columns['toggle'] = array(
+      'type' => 'int',
+      'not null' => FALSE,
+      'default' => 0,
+    );
+  return array(
+    'columns' => $columns,
+  );
+  }
+}
+
