@@ -1,6 +1,18 @@
 <?php
 
 /**
+ * helper config function.
+ */
+function _share_light_channels() {
+  // return the known channles indexed by channel name
+  return array(
+    'twitter' => t('Twitter'),
+    'facebook' => t('Facebook'),
+    'forward' => t('Email'),
+  );
+}
+
+/**
  * Implements hook_menu().
  */
 function share_light_menu() {
@@ -13,9 +25,49 @@ function share_light_menu() {
     'access arguments' => array('access forward'),
     'type'             => MENU_CALLBACK
   );
+
+  $items['admin/config/content/share_light'] = array(
+    'title' => t('Share light'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('share_light_settings_form'),
+    'description' => 'Configure share light block.',
+    'access arguments' => array('administer share'),
+  );
   return $items;
 }
 
+/**
+ * Menu callback: settings form.
+ */
+function share_light_settings_form() {
+
+  $form['channels'] = array(
+    '#title' => t('Enable social media channels for sharing.'),
+    '#type' => 'checkboxes',
+    '#options' => _share_light_channels(),
+    '#description' => t('The content types for which to enable Open Graph meta tags. If none are selected then tags will be enabled for ALL content types.'),
+    '#default_value' => variable_get('share_light_enabled_channels', array_keys(_share_light_channels())),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+
+  return $form;
+}
+
+
+function share_light_settings_form_submit($form, &$form_state) {
+
+  $values = $form_state['values'];
+
+  // save content types enabled
+  variable_set('share_light_enabled_channels', $values['channels']);
+
+  // success
+  drupal_set_message("Share light settings have been updated");
+}
 /**
  * Page callback for node/%/forward
  */
@@ -117,38 +169,13 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
     }
   }
 
-  $links['facebook'] = array(
-    'title' => 'Facebook',
-    'href' => 'https://www.facebook.com/sharer.php',
-    'query' => array('u' => urlencode($url), 't' => $title),
-    'attributes' => array('title' => t('Share this via Facebook!'))
-  );
-  $links['twitter'] = array(
-    'title' => 'Twitter',
-    'href' => 'http://twitter.com/home',
-    'query' => array('status' => $url),
-    'attributes' => array('title' => t('Share this via Twitter!'))
-  );
-  $query['path'] = $link['path'];
-  if (isset($link['query'])) {
-    $query['query'] = $link['query'];
-  }
-  $parts = explode('/', $query['path']);
-  if (count($parts) == 2 && $parts[0] == 'node' && is_numeric($parts[1])) {
-    unset($query['path']);
-    $links['forward'] = array(
-      'title' => 'E-Mail',
-      'href' => $link['path'] . '/forward',
-      'query' => $query,
-      'attributes' => array('title' => t('Share this via E-Mail!'))
-    );
-  } else {
-    $links['forward'] = array(
-      'title' => 'E-Mail',
-      'href' => 'forward',
-      'query' => $query,
-      'attributes' => array('title' => t('Share this via E-Mail!'))
-    );
+  // get enabled channels
+  $channels = variable_get('share_light_enabled_channels', array_keys(_share_light_channels()));
+  foreach ($channels as $channel_name => $channel_value) {
+    if ($channel_value) {
+      $call_name = '_share_light_channel_' . $channel_name;
+      $links[$channel_name] = $call_name($channel_name, $channel_value, $url, $title, $link);
+    }
   }
 
   foreach ($links as &$x) {
@@ -177,3 +204,42 @@ function share_light_block_view_share_light_current_page_alter($data, $block) {
   }
 }
 
+function _share_light_channel_facebook($channel_name, $channel_value, $url, $title, $link) {
+  return array(
+    'title' => 'Facebook',
+    'href' => 'https://www.facebook.com/sharer.php',
+    'query' => array('u' => urlencode($url), 't' => $title),
+    'attributes' => array('title' => t('Share this via Facebook!'))
+  );
+}
+function _share_light_channel_twitter($channel_name, $channel_value, $url, $title, $link) {
+  return array(
+    'title' => 'Twitter',
+    'href' => 'http://twitter.com/home',
+    'query' => array('status' => $url),
+    'attributes' => array('title' => t('Share this via Twitter!'))
+  );
+}
+function _share_light_channel_forward($channel_name, $channel_value, $url, $title, $link) {
+  $query['path'] = $link['path'];
+  if (isset($link['query'])) {
+    $query['query'] = $link['query'];
+  }
+  $parts = explode('/', $query['path']);
+  if (count($parts) == 2 && $parts[0] == 'node' && is_numeric($parts[1])) {
+    unset($query['path']);
+    return array(
+      'title' => 'E-Mail',
+      'href' => $link['path'] . '/forward',
+      'query' => $query,
+      'attributes' => array('title' => t('Share this via E-Mail!'))
+    );
+  } else {
+    return array(
+      'title' => 'E-Mail',
+      'href' => 'forward',
+      'query' => $query,
+      'attributes' => array('title' => t('Share this via E-Mail!'))
+    );
+  }
+}
