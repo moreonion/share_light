@@ -6,6 +6,89 @@ function share_light_install() {
 }
 
 /**
+ * share_light_toggle --> share_light field type
+ */
+function share_light_update_4() {
+  $default = array(
+    'toggle' => 1,
+    'options' => array (
+      'share_url' => '',
+      'counter_toggle' => 1,
+      'advanced' => array (
+        'channel_twitter_toggle' => 1,
+        'channel_twitter_text' => '',
+        'channel_facebook_toggle' => 1,
+        'channel_forward_toggle' => 1,
+      ),
+    ),
+  );
+
+  // create new field
+  $field = \Drupal\little_helpers\Field\Field::fromType('share_light', 'share_light');
+  $field->settings = array();
+  $field->save();
+
+  // get needed bundles from old instances
+  $oldinstances = field_read_instances(array('field_name' => 'share_light_toggle', 'entity_type' => 'node'));
+  $bundles = array();
+  foreach ($oldinstances as $oldinstance) {
+    $bundles[] = $oldinstance['bundle'];
+  }
+  foreach ($bundles as $bundlename) {
+    $bundle = new \Drupal\little_helpers\Field\Bundle('node', $bundlename);
+    $instance = \Drupal\little_helpers\Field\Instance::fromField($field, $bundle);
+    $instance->label = t('Share options');
+    $instance->description = t('Set the share options for this page.');
+    $instance->widget = array(
+      'module'   => 'share_light',
+      'type'     => 'share_light',
+      'settings' => array(),
+    );
+    $instance->display = array(
+      'default' => array(
+        'label'    => 'hidden',
+        'type'     => 'hidden',
+        'settings' => array(),
+      ),
+      'cck_blocks' => array(
+        'label'    => 'hidden',
+        'type'     => 'hidden',
+        'settings' => array(),
+      ),
+    );
+    $instance->settings = array (
+      'exclude_cv' => false,
+      'custom_add_another' => '',
+      'custom_remove' => '',
+      'user_register_form' => false,
+    );
+    $instance->default_value = $default;
+    $instance->save();
+  }
+
+  // copy old field data to new fields
+  // thereby preserving the value field (on/off) of share_light_toggle
+  db_query("INSERT INTO {field_data_share_light} 
+    (entity_type, bundle, deleted, entity_id, revision_id, language, delta, share_light_toggle)
+    SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, share_light_toggle_value
+    FROM {field_data_share_light_toggle}");
+  db_query("INSERT INTO {field_revision_share_light} 
+    (entity_type, bundle, deleted, entity_id, revision_id, language, delta, share_light_toggle)
+    SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, share_light_toggle_value
+    FROM {field_revision_share_light_toggle}");
+
+  $serialized_options = serialize($default['options']);
+  db_query("UPDATE {field_data_share_light} SET share_light_options=:options", array(':options' => $serialized_options));
+  db_query("UPDATE {field_revision_share_light} SET share_light_options=:options", array(':options' => $serialized_options));
+
+  // clean up the db
+  db_query("DELETE FROM {field_config} WHERE field_name='share_light_toggle'");
+  db_query("DELETE FROM {field_config_instance} WHERE field_name='share_light_toggle'");
+  db_drop_table('field_data_share_light_toggle');
+  db_drop_table('field_revision_share_light_toggle');
+}
+
+/**
  * field_share_light -> share_light_toggle
  */
 function share_light_update_3() {
@@ -123,15 +206,15 @@ function _share_light_add_field_to_node_type($bundle) {
  */
 function share_light_field_schema($field) {
   if ($field['type'] == 'share_light') {
-    $columns['options'] = array(
-      'type' => 'blob',
-      'not null' => FALSE,
-      'serialize' => TRUE,
-    );
     $columns['toggle'] = array(
       'type' => 'int',
       'not null' => FALSE,
       'default' => 0,
+    );
+    $columns['options'] = array(
+      'type' => 'blob',
+      'not null' => FALSE,
+      'serialize' => TRUE,
     );
   return array(
     'columns' => $columns,
