@@ -179,14 +179,16 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   }
 
   // get enabled channels
-  $channels = variable_get('share_light_enabled_channels', array_keys(_share_light_channels()));
+  $channels = variable_get('share_light_enabled_channels', _share_light_channels());
   // display the enabled channels
   foreach ($channels as $channel_name => $channel_value) {
     if ($channel_value) {
-      if (!isset($share_light_field['options']['channel_'.$channel_name.'_toggle']) ||
-          $share_light_field['options']['channel_'.$channel_name.'_toggle'] == 1) {
+      if (!isset($share_light_field['options']['advanced']['channel_'.$channel_name.'_toggle']) ||
+          $share_light_field['options']['advanced']['channel_'.$channel_name.'_toggle'] == 1) {
         $call_name = '_share_light_channel_' . $channel_name;
-        $links[$channel_name] = $call_name($channel_name, $channel_value, $url, $title, $share_light_field, $link);
+        if (function_exists($call_name)) {
+          $links[$channel_name] = $call_name($channel_name, $channel_value, $url, $title, $share_light_field, $link);
+        }
       }
     }
   }
@@ -227,8 +229,8 @@ function _share_light_channel_facebook($channel_name, $channel_value, $url, $tit
 }
 function _share_light_channel_twitter($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
   $text = $url;
-  if (!empty($share_light_field['options']['channel_'.$channel_name.'_text'])) {
-    $text = $share_light_field['options']['channel_'.$channel_name.'_text'] . ' ' . $url;
+  if (!empty($share_light_field['options']['advanced']['channel_'.$channel_name.'_text'])) {
+    $text = $share_light_field['options']['advanced']['channel_'.$channel_name.'_text'] . ' ' . $url;
   }
   return array(
     'title' => 'Twitter',
