@@ -279,9 +279,25 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     $channel_default_values['channel_'.$channel_name.'_text'] = '';
   }
 
+  // TODO nid can be empty when new node is created
+  /*
+  $nid = $form['nid']['#value'];
+  $lang_list = language_list();
+  $lang = !empty($form['language']['#value']) ? $form['language']['#value'] : NULL;
+  $node_path_or_alias = drupal_get_path_alias('node/'.$nid, $lang);
+  $default_url = url('node/'.$nid, array(
+    'absolute' => TRUE,
+    'language' => $lang_list[$lang],
+  ));
+   */
+  $default_url = '';
   $defaults = array(
     'toggle' => variable_get('share_light_default_toggle', '1'),
-    'options' => $channel_default_values,
+    'options' => array(
+      'share_url' => $default_url,
+      'counter_toggle' => variable_get('share_light_default_counter_toggle', 1),
+      'advanced' => $channel_default_values,
+    ),
   );
 
   $item = drupal_array_merge_deep($defaults, $item);
@@ -292,9 +308,9 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     '#type' => 'checkbox',
     '#default_value' => $item['toggle'],
   );
+
   $element['options'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Share advanced settings.'),
+    '#type' => 'container',
     '#states' => array(
       'visible' => array(
         '#edit-'.strtr($field['field_name'], '_', '-').'-'.$langcode.'-'.$delta.'-toggle' => array('checked' => TRUE),
@@ -302,25 +318,56 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     ),
   );
 
+  $element['options']['share_url'] = array(
+    '#title' => t('URL to be shared.'),
+    '#description' => t('URL to be shared.'),
+    '#type' => 'textfield',
+    '#size' => 60,
+    '#default_value' => $item['options']['share_url'],
+);
+
+  $element['options']['counter_toggle'] = array(
+    '#title' => t('Show counter (number of shares) along with share options'),
+    '#description' => t('Show counter (number of shares) along with share options'),
+    '#type' => 'checkbox',
+    '#default_value' => $item['options']['counter_toggle'],
+);
+
+  $element['options']['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced share options'),
+    '#collapsible' => TRUE,
+  );
+
+  $weight = 10;
   foreach ($channels as $channel_name => $channel_value) {
     $title = $default_channels[$channel_name];
-    $element['options']['channel_'.$channel_name.'_toggle'] = array(
-      '#title' => t('Enable '.$title.' on this page.'),
+    $element['options']['advanced']['channel_'.$channel_name.'_toggle'] = array(
+      '#title' => t('Show '.$title.' share button.'),
       '#description' => t('Enable '.$title.' on this page.'),
       '#type' => 'checkbox',
-      '#default_value' => $item['options']['channel_'.$channel_name.'_toggle'],
+      '#default_value' => $item['options']['advanced']['channel_'.$channel_name.'_toggle'],
       '#access' => $channel_value ? TRUE : FALSE,
+      '#weight' => $weight,
     );
-    $element['options']['channel_'.$channel_name.'_text'] = array(
-      '#title' => t('Share text for ' . $title . '.'),
-      '#description' => ('Share text for ' . $title . '.'),
-      '#type' => 'textfield',
-      '#size' => 60,
-      '#maxlength' => 255,
-      '#attributes' => array(),
-      '#default_value' => $item['options']['channel_'.$channel_name.'_text'],
-      '#access' => $channel_value ? TRUE : FALSE,
-    );
+
+    if ($channel_name == 'twitter') {
+      $title = $default_channels[$channel_name];
+      $element['options']['advanced']['channel_'.$channel_name.'_text'] = array(
+        '#title' => t('Share text for ' . $title . '.'),
+        '#description' => ('Share text for ' . $title . '.'),
+        '#type' => 'textarea',
+        '#cols' => 60,
+        '#rows' => 2,
+        '#maxlength' => 255,
+        '#attributes' => array(),
+        '#default_value' => $item['options']['advanced']['channel_'.$channel_name.'_text'],
+        '#access' => $channel_value ? TRUE : FALSE,
+        '#weight' => $element['options']['advanced']['channel_'.$channel_name.'_toggle']['#weight'] + 1,
+      );
+    }
+
+    $weight += 10;
   }
 
   return $element;
