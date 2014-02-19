@@ -228,14 +228,11 @@ function _share_light_channel_facebook($channel_name, $channel_value, $url, $tit
   );
 }
 function _share_light_channel_twitter($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
-  $text = $url;
-  if (!empty($share_light_field['options']['advanced']['channel_'.$channel_name.'_text'])) {
-    $text = $share_light_field['options']['advanced']['channel_'.$channel_name.'_text'] . ' ' . $url;
-  }
+  $text = $share_light_field['options']['advanced']['channel_'.$channel_name.'_text'];
   return array(
     'title' => 'Twitter',
-    'href' => 'http://twitter.com/home',
-    'query' => array('status' => $text),
+    'href' => 'http://twitter.com/share',
+    'query' => array('text' => $text, 'url' => $url),
     'attributes' => array('title' => t('Share this via Twitter!'))
   );
 }
@@ -361,7 +358,7 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
         '#type' => 'textarea',
         '#cols' => 60,
         '#rows' => 2,
-        '#maxlength' => 255,
+        '#maxlength' => 116, //140-23(url in https)
         '#attributes' => array(),
         '#default_value' => $item['options']['advanced']['channel_'.$channel_name.'_text'],
         '#access' => $channel_value ? TRUE : FALSE,
