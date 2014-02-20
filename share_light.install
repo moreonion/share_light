@@ -3,6 +3,27 @@
 function share_light_install() {
   share_light_update_1();
   share_light_update_2();
+  _share_light_set_channel_default_states();
+}
+
+/**
+ * helper function to set channel defaults.
+ */
+function _share_light_set_channel_default_states() {
+  // every channel but pinterest is enabled by default
+  $default_channels = _share_light_channels();
+  foreach ($default_channels as $channel_name => $channel_title) {
+    $default_channels[$channel_name] = $channel_name;
+  }
+  $default_channels['pinterest'] = 0;
+  variable_set('share_light_enabled_channels', $default_channels);
+}
+
+/**
+ * Set default enabled channels.
+ */
+function share_light_update_5() {
+  _share_light_set_channel_default_states();
 }
 
 /**

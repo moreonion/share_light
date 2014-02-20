@@ -46,7 +46,7 @@ function share_light_settings_form() {
     '#title' => t('Enable social media channels for sharing.'),
     '#type' => 'checkboxes',
     '#options' => _share_light_channels(),
-    '#description' => t('The social media channels available for sharing. If none are selected then ALL channels will be enabled.'),
+    '#description' => t('The social media channels available for sharing.'),
     '#default_value' => variable_get('share_light_enabled_channels', array_keys(_share_light_channels())),
   );
 
@@ -183,12 +183,13 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   $channels = variable_get('share_light_enabled_channels', _share_light_channels());
   // display the enabled channels
   foreach ($channels as $channel_name => $channel_value) {
+    $options = $share_light_field['options'];
     if ($channel_value) {
-      if (!isset($share_light_field['options']['advanced']['channel_'.$channel_name.'_toggle']) ||
-          $share_light_field['options']['advanced']['channel_'.$channel_name.'_toggle'] == 1) {
+      if ((!empty($options['channel_'.$channel_name.'_toggle']) && $options['channel_'.$channel_name.'_toggle'] == 1)
+        || variable_get('share_light_channel_default_' . $channel_name, 1) == 1) {
         $call_name = '_share_light_channel_' . $channel_name;
         if (function_exists($call_name)) {
-          $links[$channel_name] = $call_name($channel_name, $channel_value, $url, $title, $share_light_field, $link);
+          $links[$channel_name] = $call_name($channel_name, $channel_value, $url, $title, $options, $link);
         }
       }
     }
@@ -220,7 +221,7 @@ function share_light_block_view_share_light_current_page_alter($data, $block) {
   }
 }
 
-function _share_light_channel_facebook($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
+function _share_light_channel_facebook($channel_name, $channel_value, $url, $title, $options, $link) {
   return array(
     'title' => 'Facebook',
     'href' => 'https://www.facebook.com/sharer.php',
@@ -228,8 +229,8 @@ function _share_light_channel_facebook($channel_name, $channel_value, $url, $tit
     'attributes' => array('title' => t('Share this via Facebook!'))
   );
 }
-function _share_light_channel_twitter($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
-  $text = $share_light_field['options']['advanced']['channel_'.$channel_name.'_text'];
+function _share_light_channel_twitter($channel_name, $channel_value, $url, $title, $options, $link) {
+  $text = isset($options['advanced']['channel_'.$channel_name.'_text']) ? $options['advanced']['channel_'.$channel_name.'_text'] : '';
   return array(
     'title' => 'Twitter',
     'href' => 'http://twitter.com/share',
@@ -237,8 +238,8 @@ function _share_light_channel_twitter($channel_name, $channel_value, $url, $titl
     'attributes' => array('title' => t('Share this via Twitter!'))
   );
 }
-function _share_light_channel_pinterest($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
-  $text = $share_light_field['options']['advanced']['channel_'.$channel_name.'_text'];
+function _share_light_channel_pinterest($channel_name, $channel_value, $url, $title, $options, $link) {
+  $text = isset($options['advanced']['channel_'.$channel_name.'_text']) ? $options['advanced']['channel_'.$channel_name.'_text'] : '';
   $image = ''; //TODO
   return array(
     'title' => 'Pinterest',
@@ -247,7 +248,7 @@ function _share_light_channel_pinterest($channel_name, $channel_value, $url, $ti
     'attributes' => array('title' => t('Share this via Pinterest!'))
   );
 }
-function _share_light_channel_forward($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
+function _share_light_channel_forward($channel_name, $channel_value, $url, $title, $options, $link) {
   $query['path'] = $link['path'];
   if (isset($link['query'])) {
     $query['query'] = $link['query'];
@@ -366,7 +367,7 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
       $title = $default_channels[$channel_name];
       $textarea =  array(
         '#title' => t('Share text for ' . $title . '.'),
-        '#description' => ('Share text for ' . $title . '.'),
+        '#description' => t('Share text for ' . $title . '.'),
         '#type' => 'textarea',
         '#cols' => 60,
         '#rows' => 2,
@@ -384,13 +385,13 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
       // Twitter
       if ($channel_name == 'twitter') {
         $textarea['#title'] = t('Tweet text for ' . $title . '.');
-        $textarea['#description'] = ('Tweet text for ' . $title . '.');
+        $textarea['#description'] = t('Tweet text for ' . $title . '.');
         $textarea['#maxlength'] = 116; // = 140 - 1 - 23 (tweet max-length - space - url in https)
 
       // Pinterest
       } else if ($channel_name == 'pinterest') {
         $textarea['#title'] = t('Description text for ' . $title . '.');
-        $textarea['#description'] = ('Description text for ' . $title . '.');
+        $textarea['#description'] = t('Description text for ' . $title . '.');
         $textarea['#maxlength'] = 500; // the pinterest max-length for descriptions
       }
 
