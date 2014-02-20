@@ -375,6 +375,11 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
         '#default_value' => $item['options']['advanced']['channel_'.$channel_name.'_text'],
         '#access' => $channel_value ? TRUE : FALSE,
         '#weight' => $element['options']['advanced']['channel_'.$channel_name.'_toggle']['#weight'] + 1,
+        '#states' => array(
+          'visible' => array(
+            '#edit-'.strtr($field['field_name'], '_', '-').'-'.$langcode.'-'.$delta.'-options-advanced-channel-'.$channel_name.'-toggle' => array('checked' => TRUE),
+          ),
+        ),
       );
       // Twitter
       if ($channel_name == 'twitter') {
