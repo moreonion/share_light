@@ -181,6 +181,29 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
 
   // get enabled channels
   $channels = variable_get('share_light_enabled_channels', _share_light_channels());
+  // try to use a default image url if no image url is saved (yet)
+  $image_default_fields = variable_get('share_light_image_default_fields', array());
+  if (!is_array($image_default_fields)) {
+    $image_default_fields = array($image_default_fields);
+  }
+  $found_image = array();
+  // an fid of 0 gets saved if no image is selected
+  // TODO deal with the case somebody explicitly does not want to
+  // share a default field
+  if ((empty($share_light_field['options']['image']) || $share_light_field['options']['image']['fid'] == 0) && !empty($node->nid)) {
+    foreach ($image_default_fields as $try_field) {
+      if ($found_image = field_get_items('node', $node, $try_field)) {
+        break;
+      }
+    }
+  }
+
+  $file = file_load($share_light_field['options']['image']['fid']);
+  if (!$file && !empty($found_image[0]['fid'])) {
+    $file = file_load($found_image[0]['fid']);
+  }
+  $share_light_field['options']['image'] = $file;
+
   // display the enabled channels
   foreach ($channels as $channel_name => $channel_value) {
     $options = $share_light_field['options'];
@@ -240,11 +263,18 @@ function _share_light_channel_twitter($channel_name, $channel_value, $url, $titl
 }
 function _share_light_channel_pinterest($channel_name, $channel_value, $url, $title, $options, $link) {
   $text = isset($options['advanced']['channel_'.$channel_name.'_text']) ? $options['advanced']['channel_'.$channel_name.'_text'] : '';
-  $image = ''; //TODO
+
+  // get the url from the media object
+  $media_url = '';
+  if (!empty($options['image']->type)) {
+    if ($options['image']->type == 'image' && $image = image_load($options['image']->uri)) {
+      $media_url = file_create_url($image->source);
+    }
+  }
   return array(
     'title' => 'Pinterest',
     'href' => 'http://www.pinterest.com/pin/create/button/',
-    'query' => array('url' => $url, 'media' => $image, 'description' => $text),
+    'query' => array('url' => $url, 'media' => $media_url, 'description' => $text),
     'attributes' => array('title' => t('Share this via Pinterest!'))
   );
 }
@@ -301,12 +331,14 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     'language' => $lang_list[$lang],
   ));
    */
+
   $default_url = '';
   $defaults = array(
     'toggle' => variable_get('share_light_default_toggle', '1'),
     'options' => array(
       'share_url' => $default_url,
       'counter_toggle' => variable_get('share_light_default_counter_toggle', 1),
+      'image' => '',
       'advanced' => $channel_default_values,
     ),
   );
@@ -335,7 +367,14 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     '#type' => 'textfield',
     '#size' => 60,
     '#default_value' => $item['options']['share_url'],
-);
+  );
+
+  $element['options']['image'] = array(
+    '#title' => t('Image to be shared.'),
+    '#description' => t('Image to be shared.'),
+    '#type' => 'media',
+    '#default_value' => $item['options']['image'],
+  );
 
   $element['options']['counter_toggle'] = array(
     '#title' => t('Show counter (number of shares) along with share options'),
