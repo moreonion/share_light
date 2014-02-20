@@ -9,6 +9,7 @@ function _share_light_channels() {
     'twitter' => t('Twitter'),
     'facebook' => t('Facebook'),
     'forward' => t('Email'),
+    'pinterest' => t('Pinterest'),
   );
 }
 
@@ -45,7 +46,7 @@ function share_light_settings_form() {
     '#title' => t('Enable social media channels for sharing.'),
     '#type' => 'checkboxes',
     '#options' => _share_light_channels(),
-    '#description' => t('The content types for which to enable Open Graph meta tags. If none are selected then tags will be enabled for ALL content types.'),
+    '#description' => t('The social media channels available for sharing. If none are selected then ALL channels will be enabled.'),
     '#default_value' => variable_get('share_light_enabled_channels', array_keys(_share_light_channels())),
   );
 
@@ -236,6 +237,16 @@ function _share_light_channel_twitter($channel_name, $channel_value, $url, $titl
     'attributes' => array('title' => t('Share this via Twitter!'))
   );
 }
+function _share_light_channel_pinterest($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
+  $text = $share_light_field['options']['advanced']['channel_'.$channel_name.'_text'];
+  $image = ''; //TODO
+  return array(
+    'title' => 'Pinterest',
+    'href' => 'http://www.pinterest.com/pin/create/button/',
+    'query' => array('url' => $url, 'media' => $image, 'description' => $text),
+    'attributes' => array('title' => t('Share this via Pinterest!'))
+  );
+}
 function _share_light_channel_forward($channel_name, $channel_value, $url, $title, $share_light_field, $link) {
   $query['path'] = $link['path'];
   if (isset($link['query'])) {
@@ -350,20 +361,35 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
       '#weight' => $weight,
     );
 
-    if ($channel_name == 'twitter') {
+    // needs a text field
+    if ($channel_name == 'twitter' || $channel_name == 'pinterest') {
       $title = $default_channels[$channel_name];
-      $element['options']['advanced']['channel_'.$channel_name.'_text'] = array(
+      $textarea =  array(
         '#title' => t('Share text for ' . $title . '.'),
         '#description' => ('Share text for ' . $title . '.'),
         '#type' => 'textarea',
         '#cols' => 60,
         '#rows' => 2,
-        '#maxlength' => 116, //140-23(url in https)
+        '#maxlength' => 225,
         '#attributes' => array(),
         '#default_value' => $item['options']['advanced']['channel_'.$channel_name.'_text'],
         '#access' => $channel_value ? TRUE : FALSE,
         '#weight' => $element['options']['advanced']['channel_'.$channel_name.'_toggle']['#weight'] + 1,
       );
+      // Twitter
+      if ($channel_name == 'twitter') {
+        $textarea['#title'] = t('Tweet text for ' . $title . '.');
+        $textarea['#description'] = ('Tweet text for ' . $title . '.');
+        $textarea['#maxlength'] = 116; // = 140 - 1 - 23 (tweet max-length - space - url in https)
+
+      // Pinterest
+      } else if ($channel_name == 'pinterest') {
+        $textarea['#title'] = t('Description text for ' . $title . '.');
+        $textarea['#description'] = ('Description text for ' . $title . '.');
+        $textarea['#maxlength'] = 500; // the pinterest max-length for descriptions
+      }
+
+      $element['options']['advanced']['channel_'.$channel_name.'_text'] = $textarea;
     }
 
     $weight += 10;
