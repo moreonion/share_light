@@ -16,7 +16,7 @@ function _share_light_set_channel_default_states() {
     $default_channels[$channel_name] = $channel_name;
   }
   $default_channels['pinterest'] = 0;
-  variable_set('share_light_enabled_channels', $default_channels);
+  variable_set('share_light_channels_enabled', $default_channels);
 }
 
 /**
