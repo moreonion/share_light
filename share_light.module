@@ -50,7 +50,6 @@ function share_light_settings_form() {
     '#default_value' => variable_get('share_light_channels_enabled', array_keys(_share_light_channels())),
   );
 
-
   return system_settings_form($form);
 }
 
@@ -197,7 +196,7 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
         $options['advanced']['channel_'.$channel_name.'_toggle'] == 1) {
         $call_name = '_share_light_channel_' . $channel_name;
         if (function_exists($call_name)) {
-          $links[$channel_name] = $call_name($channel_name, $channel_value, $url, $title, $options, $link);
+          $links[$channel_name] = $call_name($url, $title, $options, $link);
         }
       }
     }
@@ -229,7 +228,7 @@ function share_light_block_view_share_light_current_page_alter($data, $block) {
   }
 }
 
-function _share_light_channel_facebook($channel_name, $channel_value, $url, $title, $options, $link) {
+function _share_light_channel_facebook($url, $title, $options, $link) {
   return array(
     'title' => 'Facebook',
     'href' => 'https://www.facebook.com/sharer.php',
@@ -237,8 +236,8 @@ function _share_light_channel_facebook($channel_name, $channel_value, $url, $tit
     'attributes' => array('title' => t('Share this via Facebook!'))
   );
 }
-function _share_light_channel_twitter($channel_name, $channel_value, $url, $title, $options, $link) {
-  $text = isset($options['advanced']['channel_'.$channel_name.'_text']) ? $options['advanced']['channel_'.$channel_name.'_text'] : '';
+function _share_light_channel_twitter($url, $title, $options, $link) {
+  $text = isset($options['advanced']['channel_twitter_text']) ? $options['advanced']['channel_twitter_text'] : '';
   return array(
     'title' => 'Twitter',
     'href' => 'http://twitter.com/share',
@@ -246,8 +245,8 @@ function _share_light_channel_twitter($channel_name, $channel_value, $url, $titl
     'attributes' => array('title' => t('Share this via Twitter!'))
   );
 }
-function _share_light_channel_pinterest($channel_name, $channel_value, $url, $title, $options, $link) {
-  $text = isset($options['advanced']['channel_'.$channel_name.'_text']) ? $options['advanced']['channel_'.$channel_name.'_text'] : '';
+function _share_light_channel_pinterest($url, $title, $options, $link) {
+  $text = isset($options['advanced']['channel_pinterest_text']) ? $options['advanced']['channel_pinterest_text'] : '';
 
   // get the url from the media object
   $media_url = '';
@@ -263,7 +262,7 @@ function _share_light_channel_pinterest($channel_name, $channel_value, $url, $ti
     'attributes' => array('title' => t('Share this via Pinterest!'))
   );
 }
-function _share_light_channel_forward($channel_name, $channel_value, $url, $title, $options, $link) {
+function _share_light_channel_forward($url, $title, $options, $link) {
   $query['path'] = $link['path'];
   if (isset($link['query'])) {
     $query['query'] = $link['query'];
@@ -296,12 +295,12 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     $item = $instance['default_value'][$delta];
   }
 
-  $default_channels = _share_light_channels();
-  $channels = variable_get('share_light_channels_enabled', $default_channels);
+  $available_channels = _share_light_channels();
+  $enabled_channels = variable_get('share_light_channels_enabled', $available_channels);
 
   $channel_default_values = array();
-  foreach ($default_channels as $channel_name => $channel_value) {
-    $channel_default_values['channel_'.$channel_name.'_toggle'] = $channels[$channel_name] ? 1 : 0;
+  foreach ($enabled_channels as $channel_name => $channel_value) {
+    $channel_default_values['channel_'.$channel_name.'_toggle'] = 0;
     $channel_default_values['channel_'.$channel_name.'_text'] = '';
   }
 
@@ -375,8 +374,8 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
   );
 
   $weight = 10;
-  foreach ($channels as $channel_name => $channel_value) {
-    $title = $default_channels[$channel_name];
+  foreach ($enabled_channels as $channel_name => $channel_value) {
+    $title = $available_channels[$channel_name];
     $element['options']['advanced']['channel_'.$channel_name.'_toggle'] = array(
       '#title' => t('Show '.$title.' share button.'),
       '#description' => t('Enable '.$title.' on this page.'),
@@ -388,7 +387,7 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
 
     // needs a text field
     if ($channel_name == 'twitter' || $channel_name == 'pinterest') {
-      $title = $default_channels[$channel_name];
+      $title = $available_channels[$channel_name];
       $textarea =  array(
         '#title' => t('Share text for ' . $title . '.'),
         '#description' => t('Share text for ' . $title . '.'),
