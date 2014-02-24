@@ -44,13 +44,18 @@ function share_light_update_4() {
     ),
   );
 
+  // get needed bundles from old instances
+  $oldinstances = field_read_instances(array('field_name' => 'share_light_toggle', 'entity_type' => 'node'));
+  if (empty($oldinstances)) {
+    return "No fields share_light_toggl_toggle found. Nothing to migrate.";
+  }
+
   // create new field
   $field = \Drupal\little_helpers\Field\Field::fromType('share_light', 'share_light');
   $field->settings = array();
   $field->save();
 
-  // get needed bundles from old instances
-  $oldinstances = field_read_instances(array('field_name' => 'share_light_toggle', 'entity_type' => 'node'));
+
   $bundles = array();
   foreach ($oldinstances as $oldinstance) {
     $bundles[] = $oldinstance['bundle'];
@@ -113,11 +118,16 @@ function share_light_update_4() {
  * field_share_light -> share_light_toggle
  */
 function share_light_update_3() {
-  db_query("UPDATE {field_config_instance} SET field_name='share_light_toggle', field_id=(SELECT id from {field_config} WHERE field_name='share_light_toggle') WHERE field_name='field_share_light'");
-  db_query("INSERT INTO {field_data_share_light_toggle} SELECT * FROM {field_data_field_share_light}");
-  db_query("INSERT INTO {field_revision_share_light_toggle} SELECT * FROM {field_revision_field_share_light");
-  db_query("DELETE FROM {field_data_field_share_light}");
-  db_query("DELETE FROM {field_revision_field_share_light}");
+  $oldinstances = field_read_instances(array('field_name' => 'field_share_light', 'entity_type' => 'node'));
+  if (!empty($oldinstances)) {
+    db_query("UPDATE {field_config_instance} SET field_name='share_light_toggle', field_id=(SELECT id from {field_config} WHERE field_name='share_light_toggle') WHERE field_name='field_share_light'");
+    db_query("INSERT INTO {field_data_share_light_toggle} SELECT * FROM {field_data_field_share_light}");
+    db_query("INSERT INTO {field_revision_share_light_toggle} SELECT * FROM {field_revision_field_share_light");
+    db_query("DELETE FROM {field_data_field_share_light}");
+    db_query("DELETE FROM {field_revision_field_share_light}");
+  } else {
+    return "No fields field_share_light found. Nothing to migrate.";
+  }
 }
 
 /**
