@@ -97,7 +97,8 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   $url = url($link['path'], $link + array('absolute' => TRUE));
 
   $self = NULL;
-  if (($node = menu_get_object()) && $node->nid) {
+  $node = menu_get_object('node', 1, $link['path']);
+  if (!empty($node->nid)) {
     $self = $node;
     // use new field if present, try the old one otherwise
     $share_light_fields = _share_light_field_instances('node', $node, 'share_light');
@@ -182,7 +183,10 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
     }
   }
 
-  $file = file_load($share_light_field['options']['image']['fid']);
+  $file = NULL;
+  if (!empty($share_light_field)) {
+    $file = file_load($share_light_field['options']['image']['fid']);
+  }
   if (!$file && !empty($found_image[0]['fid'])) {
     $file = file_load($found_image[0]['fid']);
   }
