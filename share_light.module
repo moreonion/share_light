@@ -108,21 +108,6 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
         // do not display the block
         return NULL;
       }
-    } else {
-      // if there is a defined entry for the share_light toggle field use this
-      // otherwise check for the share_light default behaviour variable
-      $field = field_get_items('node', $node, 'share_light_toggle');
-      // check for remaining "old" fields (former field name)
-      if (!$field || !count($field)) {
-        $field = field_get_items('node', $node, 'field_share_light');
-      }
-      if ($field && count($field)) {
-        if (!$field[0]['value']) {
-          return NULL;
-        }
-      } elseif (variable_get('share_light_default_toggle', '1') == '0') {
-        return NULL;
-      }
     }
   }
 
