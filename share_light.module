@@ -519,6 +519,9 @@ function _share_light_field_instances($entity_type, $node, $field_type) {
       if ($item) {
         $fields[$instance['field_name']] = $item[0];
       }
+      if (count($instance['default_value'])) {
+        $fields[$instance['field_name']] += $instance['default_value'][0];
+      }
     }
   }
   return $fields;
