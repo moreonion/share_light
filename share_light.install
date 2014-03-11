@@ -44,17 +44,16 @@ function share_light_update_4() {
     ),
   );
 
-  // get needed bundles from old instances
-  $oldinstances = field_read_instances(array('field_name' => 'share_light_toggle', 'entity_type' => 'node'));
-  if (empty($oldinstances)) {
-    return "No fields share_light_toggl_toggle found. Nothing to migrate.";
-  }
-
   // create new field
   $field = \Drupal\little_helpers\Field\Field::fromType('share_light', 'share_light');
   $field->settings = array();
   $field->save();
 
+  // get needed bundles from old instances
+  $oldinstances = field_read_instances(array('field_name' => 'share_light_toggle', 'entity_type' => 'node'));
+  if (empty($oldinstances)) {
+    return "No fields share_light_toggl_toggle found. Nothing to migrate.";
+  }
 
   $bundles = array();
   foreach ($oldinstances as $oldinstance) {
