@@ -185,7 +185,10 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
         $options['advanced']['channel_'.$channel_name.'_toggle'] == 1) {
         $call_name = '_share_light_channel_' . $channel_name;
         if (function_exists($call_name)) {
-          $links[$channel_name] = $call_name($url, $title, $options, $link);
+          $channel_link = $call_name($url, $title, $options, $link);
+          if ($channel_link) {
+            $links[$channel_name] = $channel_link;
+          }
         }
       }
     }
@@ -242,14 +245,14 @@ function _share_light_channel_pinterest($url, $title, $options, $link) {
   if (!empty($options['image']->type)) {
     if ($options['image']->type == 'image' && $image = image_load($options['image']->uri)) {
       $media_url = file_create_url($image->source);
+      return array(
+        'title' => 'Pinterest',
+        'href' => 'http://www.pinterest.com/pin/create/button/',
+        'query' => array('url' => $url, 'media' => $media_url, 'description' => $text),
+        'attributes' => array('title' => t('Share this via Pinterest!'))
+      );
     }
   }
-  return array(
-    'title' => 'Pinterest',
-    'href' => 'http://www.pinterest.com/pin/create/button/',
-    'query' => array('url' => $url, 'media' => $media_url, 'description' => $text),
-    'attributes' => array('title' => t('Share this via Pinterest!'))
-  );
 }
 function _share_light_channel_forward($url, $title, $options, $link) {
   $query['path'] = $link['path'];
