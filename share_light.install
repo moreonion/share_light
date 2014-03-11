@@ -41,6 +41,9 @@ function share_light_update_4() {
         'channel_facebook_toggle' => 1,
         'channel_forward_toggle' => 1,
       ),
+      'image' => array(
+        'fid' => 0,
+      ),
     ),
   );
 
@@ -87,7 +90,7 @@ function share_light_update_4() {
       'custom_remove' => '',
       'user_register_form' => false,
     );
-    $instance->default_value = $default;
+    $instance->default_value[0] = $default;
     $instance->save();
   }
 
