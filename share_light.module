@@ -13,6 +13,29 @@ function _share_light_channels() {
   );
 }
 
+function _share_light_defaults() {
+  $default = array(
+    'toggle' => variable_get('share_light_default_toggle', 1),
+    'options' => array (
+      'subject' => t('Share this page!'),
+      'share_url' => '',
+      'counter_toggle' => variable_get('share_light_default_counter_toggle', 1),
+      'advanced' => array (
+        'channel_facebook_toggle' => 1,
+        'channel_forward_toggle' => 1,
+        'channel_pinterest_toggle' => 1,
+        'channel_pinterest_text' => '',
+        'channel_twitter_toggle' => 1,
+        'channel_twitter_text' => '',
+      ),
+      'image' => array(
+        'fid' => 0,
+      ),
+    ),
+  );
+  return $default;
+}
+
 /**
  * Implements hook_menu().
  */
@@ -81,111 +104,65 @@ function share_light_block_info() {
  * @return renderable array
  */
 function share_light_block_view($id, $link = NULL, $options = array()) {
-  $v = array();
-  $v['subject'] = isset($options['subject']) ? t($options['subject']) : t('Share this page!');
-
-  $links = array();
-  $title = isset($options['title']) ? $options['title'] : drupal_get_title();
-
-  if (!is_array($link)) {
-    if (is_string($link)) {
+  if ($link) {
+    if (!is_array($link)) {
       $link = array('path' => $link);
-    } else {
-      $link = array('path' => current_path());
     }
+    $options['share_url'] = $link['path'];
   }
-  $url = url($link['path'], $link + array('absolute' => TRUE));
 
-  $self = NULL;
-  $node = menu_get_object('node', 1, $link['path']);
-  if (!empty($node->nid)) {
-    $self = $node;
-    // use new field if present, try the old one otherwise
-    $share_light_fields = _share_light_field_instances('node', $node, 'share_light');
-    $share_light_field = array_shift($share_light_fields);
-    if (isset($share_light_field['toggle'])) {
-      if ($share_light_field['toggle'] == '0') {
-        // do not display the block
+  // Load options from the currently displayed node.
+  if ($node = menu_get_object()) {
+    if ($item = _share_light_field_config_by_node($node, 'share_light')) {
+      if ($item['toggle'] == '0') {
         return NULL;
       }
+      if (empty($item['options']['subject'])) {
+        unset($item['options']['subject']);
+      }
+      $options += $item['options'];
     }
   }
 
-  if (isset($_GET['share'])) {
-    $share_url = $_GET['share'];
+  // Global defaults
+  $defaults = _share_light_defaults();
+  $options += $defaults['options'];
+
+  // overrides based on the current page / shared page.
+  if (empty($options['share_url'])) {
+    $options['share_url'] = current_path();
   }
 
-  $check_url = (isset($share_url) && !empty($share_url)) ? $share_url : $url;
+  drupal_alter('share_light_options', $options);
 
-  // call hook_share_light_alter to override the share_url
-  // you can determine whether to override in the hook
-  // use this for further customizations
-  $results = module_invoke_all('share_light_alter', $self, $check_url);
-  if (isset($results['url']) && !empty($results['url'])) {
-    $share_url = $results['url'];
-  }
-  if (isset($results['title']) && !empty($results['title'])) {
-    $title = $results['title'];
-  }
+  $link['path'] = $options['share_url'];
+  $url = url($link['path'], $link + array('absolute' => TRUE));
 
-  // if share is set valid, use this to generate the URL to share
-  // overrides any previously defined paths/urls
-  if (!empty($share_url)) {
-    if (valid_url($share_url, TRUE)) { // if absolute url: use it
-      $url = $share_url;
-      // since we do not want to scrape the title from the (most likely) remote page...
-      if(isset($title)) {
-        $title = '[shared via] ' . $title;
-      }
-    } else if (valid_url($share_url, FALSE)) { // if its an relative path, generate it
-      $link['path'] = $share_url;
-      $url = url($link['path'], array('absolute' => TRUE));
-      // get the title to the shared page and override the prev set $title
-      $p = drupal_get_normal_path($link['path']);
-      $node = menu_get_object('node', 1, $p);
-      if($node) {
-        $title = $node->title;
-      }
-    }
-  }
-
-  // get enabled channels
-  $channels = variable_get('share_light_channels_enabled', _share_light_channels());
   // try to use a default image url if no image url is saved (yet)
   $image_default_fields = variable_get('share_light_image_default_fields', array());
-  if (!is_array($image_default_fields)) {
-    $image_default_fields = array($image_default_fields);
-  }
-  $found_image = array();
   // an fid of 0 gets saved if no image is selected
-  // TODO deal with the case somebody explicitly does not want to
+  // @TODO deal with the case somebody explicitly does not want to
   // share a default field
-  if ((empty($share_light_field['options']['image']) || $share_light_field['options']['image']['fid'] == 0) && !empty($node->nid)) {
+  if ((empty($options['image']) || $options['image']['fid'] == 0) && !empty($node->nid)) {
     foreach ($image_default_fields as $try_field) {
       if ($found_image = field_get_items('node', $node, $try_field)) {
-        break;
+        $options['image']['fid'] = $found_image[0]['fid'];
       }
     }
   }
 
-  $file = NULL;
-  if (!empty($share_light_field)) {
-    $file = file_load($share_light_field['options']['image']['fid']);
-  }
-  if (!$file && !empty($found_image[0]['fid'])) {
-    $file = file_load($found_image[0]['fid']);
-  }
-  $share_light_field['options']['image'] = $file;
+  $options['image'] = file_load($options['image']['fid']);
 
+  $links = array();
   // display the enabled channels
+  $channels = variable_get('share_light_channels_enabled', _share_light_channels());
   foreach ($channels as $channel_name => $channel_value) {
-    $options = $share_light_field['options'];
     if ($channel_value) {
       if (!isset($options['advanced']['channel_'.$channel_name.'_toggle']) ||
         $options['advanced']['channel_'.$channel_name.'_toggle'] == 1) {
         $call_name = '_share_light_channel_' . $channel_name;
         if (function_exists($call_name)) {
-          $channel_link = $call_name($url, $title, $options, $link);
+          $channel_link = $call_name($url, $options, $link);
           if ($channel_link) {
             $links[$channel_name] = $channel_link;
           }
@@ -199,6 +176,8 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
     $x['html'] = TRUE;
     $x['attributes']['target'] = '_blank';
   }
+
+  $v['subject'] = $options['subject'];
   $v['content'] = array(
     '#theme' => 'links',
     '#links' => $links,
@@ -207,20 +186,7 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   return $v;
 }
 
-/**
- * Implements HOOK_block_view_MODULE_DELTA_alter().
- */
-function share_light_block_view_share_light_current_page_alter($data, $block) {
-  if (($node = menu_get_object()) && $node->nid) {
-    // use field share_light_title to override default block title
-    $field_title = field_get_items('node', $node, 'share_light_title');
-    if ($field_title && count($field_title) && $field_title[0]['value']) {
-      $block->title = $field_title[0]['value'];
-    }
-  }
-}
-
-function _share_light_channel_facebook($url, $title, $options, $link) {
+function _share_light_channel_facebook($url, $options, $link) {
   return array(
     'title' => 'Facebook',
     'href' => 'https://www.facebook.com/sharer.php',
@@ -228,7 +194,7 @@ function _share_light_channel_facebook($url, $title, $options, $link) {
     'attributes' => array('title' => t('Share this via Facebook!'))
   );
 }
-function _share_light_channel_twitter($url, $title, $options, $link) {
+function _share_light_channel_twitter($url, $options, $link) {
   $text = isset($options['advanced']['channel_twitter_text']) ? $options['advanced']['channel_twitter_text'] : '';
   return array(
     'title' => 'Twitter',
@@ -237,13 +203,13 @@ function _share_light_channel_twitter($url, $title, $options, $link) {
     'attributes' => array('title' => t('Share this via Twitter!'))
   );
 }
-function _share_light_channel_pinterest($url, $title, $options, $link) {
+function _share_light_channel_pinterest($url, $options, $link) {
   $text = isset($options['advanced']['channel_pinterest_text']) ? $options['advanced']['channel_pinterest_text'] : '';
 
   // get the url from the media object
   $media_url = '';
   if (!empty($options['image']->type)) {
-    if ($options['image']->type == 'image' && $image = image_load($options['image']->uri)) {
+    if ($options['image']->type == 'image' && ($image = image_load($options['image']->uri))) {
       $media_url = file_create_url($image->source);
       return array(
         'title' => 'Pinterest',
@@ -254,7 +220,8 @@ function _share_light_channel_pinterest($url, $title, $options, $link) {
     }
   }
 }
-function _share_light_channel_forward($url, $title, $options, $link) {
+
+function _share_light_channel_forward($url, $options, $link) {
   $query['path'] = $link['path'];
   if (isset($link['query'])) {
     $query['query'] = $link['query'];
@@ -290,36 +257,7 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
   $available_channels = _share_light_channels();
   $enabled_channels = variable_get('share_light_channels_enabled', $available_channels);
 
-  $channel_default_values = array();
-  foreach ($enabled_channels as $channel_name => $channel_value) {
-    $channel_default_values['channel_'.$channel_name.'_toggle'] = 0;
-    $channel_default_values['channel_'.$channel_name.'_text'] = '';
-  }
-
-  // TODO nid can be empty when new node is created
-  /*
-  $nid = $form['nid']['#value'];
-  $lang_list = language_list();
-  $lang = !empty($form['language']['#value']) ? $form['language']['#value'] : NULL;
-  $node_path_or_alias = drupal_get_path_alias('node/'.$nid, $lang);
-  $default_url = url('node/'.$nid, array(
-    'absolute' => TRUE,
-    'language' => $lang_list[$lang],
-  ));
-   */
-
-  $default_url = '';
-  $defaults = array(
-    'toggle' => variable_get('share_light_default_toggle', '1'),
-    'options' => array(
-      'share_url' => $default_url,
-      'counter_toggle' => variable_get('share_light_default_counter_toggle', 1),
-      'image' => '',
-      'advanced' => $channel_default_values,
-    ),
-  );
-
-  $item = drupal_array_merge_deep($defaults, $item);
+  $item = drupal_array_merge_deep(_share_light_defaults(), $item);
 
   $element['toggle'] = array(
     '#title' => t('Display a share block.'),
@@ -337,9 +275,16 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     ),
   );
 
+  $element['options']['subject'] = array(
+    '#title' => t('Title of the share-box.'),
+    '#description' => t('The title is typically displayed right above the share buttons.'),
+    '#type' => 'textfield',
+    '#default_value' => $item['options']['subject'],
+  );
+
   $element['options']['share_url'] = array(
     '#title' => t('URL to be shared.'),
-    '#description' => t('URL to be shared.'),
+    '#description' => t('URL to be shared. Leave this empty to share the current page.'),
     '#type' => 'textfield',
     '#size' => 60,
     '#default_value' => $item['options']['share_url'],
@@ -365,6 +310,7 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     '#type' => 'fieldset',
     '#title' => t('Advanced share options'),
     '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
 
   $weight = 10;
@@ -497,20 +443,27 @@ function share_light_field_is_empty($item, $field) {
  * utility function: returns all field items by field type in array
  * (indexed by field name)
  */
-function _share_light_field_instances($entity_type, $node, $field_type) {
-  $instances = field_info_instances($entity_type, $node->type);
-  $fields = array();
+function _share_light_field_config_by_node($node, $field_type) {
+  $instances = field_info_instances('node', $node->type);
   foreach ($instances as $instance) {
     $field_info = field_info_field($instance['field_name']);
     if ($field_info['type'] == $field_type) {
-      $item = field_get_items($entity_type, $node, $instance['field_name']);
+      $item = field_get_items('node', $node, $instance['field_name']);
+      $data = array();
       if ($item) {
-        $fields[$instance['field_name']] = $item[0];
+        $data += $item[0];
+      }
+      if (empty($data['options']['subject'])) {
+        unset($data['options']['subject']);
       }
       if (count($instance['default_value'])) {
-        $fields[$instance['field_name']] += $instance['default_value'][0];
+        $data += $instance['default_value'][0];
       }
+      if (empty($data['options']['subject'])) {
+        unset($data['options']['subject']);
+      }
+      return $data;
     }
   }
-  return $fields;
+  return array();
 }

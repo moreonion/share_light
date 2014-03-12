@@ -30,22 +30,8 @@ function share_light_update_5() {
  * share_light_toggle --> share_light field type
  */
 function share_light_update_4() {
-  $default = array(
-    'toggle' => 1,
-    'options' => array (
-      'share_url' => '',
-      'counter_toggle' => 1,
-      'advanced' => array (
-        'channel_twitter_toggle' => 1,
-        'channel_twitter_text' => '',
-        'channel_facebook_toggle' => 1,
-        'channel_forward_toggle' => 1,
-      ),
-      'image' => array(
-        'fid' => 0,
-      ),
-    ),
-  );
+  $default = _share_light_defaults();
+  $default['options']['subject'] = '';
 
   // create new field
   $field = \Drupal\little_helpers\Field\Field::fromType('share_light', 'share_light');
@@ -109,11 +95,33 @@ function share_light_update_4() {
   db_query("UPDATE {field_data_share_light} SET share_light_options=:options", array(':options' => $serialized_options));
   db_query("UPDATE {field_revision_share_light} SET share_light_options=:options", array(':options' => $serialized_options));
 
+  if (db_table_exists('field_data_share_light_title')) {
+    foreach (db_query('SELECT entity_type, entity_id, share_light_title_value as title FROM {field_data_share_light_title}') as $row) {
+      $data = $default['options'];
+      $data['subject'] = $row->title;
+      $params = array(
+        ':type' => $row->entity_type,
+        ':id' => $row->entity_id,
+        ':options' => serialize($data),
+      );
+      db_query("UPDATE {field_data_share_light} SET share_light_options=:options WHERE entity_type=:type AND entity_id=:id", $params);
+      db_query("UPDATE {field_revision_share_light} SET share_light_options=:options WHERE entity_type=:type AND entity_id=:id", $params);
+    }
+    // clean up the db
+    db_query("DELETE FROM {field_config} WHERE field_name='share_light_title'");
+    db_query("DELETE FROM {field_config_instance} WHERE field_name='share_light_title'");
+    db_drop_table('field_data_share_light_title');
+    db_drop_table('field_revision_share_light_title');
+  }
+
   // clean up the db
   db_query("DELETE FROM {field_config} WHERE field_name='share_light_toggle'");
   db_query("DELETE FROM {field_config_instance} WHERE field_name='share_light_toggle'");
   db_drop_table('field_data_share_light_toggle');
   db_drop_table('field_revision_share_light_toggle');
+
+  // Delete block title overrides from block interface.
+  db_query("UPDATE {block} SET title='' WHERE module='share_light'");
 }
 
 /**
