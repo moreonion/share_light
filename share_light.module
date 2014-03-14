@@ -104,6 +104,9 @@ function share_light_block_info() {
  * @return renderable array
  */
 function share_light_block_view($id, $link = NULL, $options = array()) {
+  if (isset($_GET['share'])) {
+    $options['share_url'] = $_GET['share'];
+  }
   if ($link) {
     if (!is_array($link)) {
       $link = array('path' => $link);
