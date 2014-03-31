@@ -262,18 +262,20 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
 
   $item = drupal_array_merge_deep(_share_light_defaults(), $item);
 
+  $toggle_id = drupal_html_id('share-light-widget-toggle');
   $element['toggle'] = array(
     '#title' => t('Display a share block.'),
     '#description' => t('Display a share block.'),
     '#type' => 'checkbox',
     '#default_value' => $item['toggle'],
+    '#attributes' => array('id' => $toggle_id),
   );
 
   $element['options'] = array(
     '#type' => 'container',
     '#states' => array(
       'visible' => array(
-        '#edit-'.strtr($field['field_name'], '_', '-').'-'.$langcode.'-'.$delta.'-toggle' => array('checked' => TRUE),
+        '#' . $toggle_id => array('checked' => TRUE),
       ),
     ),
   );
@@ -319,6 +321,7 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
   $weight = 10;
   foreach ($enabled_channels as $channel_name => $channel_value) {
     $title = $available_channels[$channel_name];
+    $ctoggle_id = drupal_html_id('share-light-channel-' . $channel_name . '-toggle');
     $element['options']['advanced']['channel_'.$channel_name.'_toggle'] = array(
       '#title' => t('Show '.$title.' share button.'),
       '#description' => t('Enable '.$title.' on this page.'),
@@ -326,6 +329,7 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
       '#default_value' => $item['options']['advanced']['channel_'.$channel_name.'_toggle'],
       '#access' => $channel_value ? TRUE : FALSE,
       '#weight' => $weight,
+      '#attributes' => array('id' => $ctoggle_id),
     );
 
     // needs a text field
@@ -344,7 +348,7 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
         '#weight' => $element['options']['advanced']['channel_'.$channel_name.'_toggle']['#weight'] + 1,
         '#states' => array(
           'visible' => array(
-            '#edit-'.strtr($field['field_name'], '_', '-').'-'.$langcode.'-'.$delta.'-options-advanced-channel-'.$channel_name.'-toggle' => array('checked' => TRUE),
+            '#' . $ctoggle_id => array('checked' => TRUE),
           ),
         ),
       );
