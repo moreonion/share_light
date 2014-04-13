@@ -1,9 +1,40 @@
 <?php
 
+/**
+ * Implements hook_field_schema().
+ */
+function share_light_field_schema($field) {
+  if ($field['type'] == 'share_light') {
+    $columns['toggle'] = array(
+      'type' => 'int',
+      'not null' => FALSE,
+      'default' => 0,
+    );
+    $columns['options'] = array(
+      'type' => 'blob',
+      'not null' => FALSE,
+      'serialize' => TRUE,
+    );
+  return array(
+    'columns' => $columns,
+  );
+  }
+}
+
 function share_light_install() {
-  share_light_update_1();
-  share_light_update_2();
+  $default = _share_light_defaults();
+  $default['options']['subject'] = '';
+
+  // create new field
+  $field = \Drupal\little_helpers\Field\Field::fromType('share_light', 'share_light');
+  $field->settings = array();
+  $field->save();
+
   _share_light_set_channel_default_states();
+}
+
+function share_light_update_last_removed() {
+  return 3;
 }
 
 /**
@@ -123,143 +154,3 @@ function share_light_update_4() {
   // Delete block title overrides from block interface.
   db_query("UPDATE {block} SET title='' WHERE module='share_light'");
 }
-
-/**
- * field_share_light -> share_light_toggle
- */
-function share_light_update_3() {
-  $oldinstances = field_read_instances(array('field_name' => 'field_share_light', 'entity_type' => 'node'));
-  if (!empty($oldinstances)) {
-    db_query("UPDATE {field_config_instance} SET field_name='share_light_toggle', field_id=(SELECT id from {field_config} WHERE field_name='share_light_toggle') WHERE field_name='field_share_light'");
-    db_query("INSERT INTO {field_data_share_light_toggle} SELECT * FROM {field_data_field_share_light}");
-    db_query("INSERT INTO {field_revision_share_light_toggle} SELECT * FROM {field_revision_field_share_light");
-    db_query("DELETE FROM {field_data_field_share_light}");
-    db_query("DELETE FROM {field_revision_field_share_light}");
-  } else {
-    return "No fields field_share_light found. Nothing to migrate.";
-  }
-}
-
-/**
- * Define field haupt_seite_toggle. Use utility function to add instance.
- */
-function share_light_update_2() {
-  $field = array (
-    'global_block_settings' => '1',
-    'field_name' => 'share_light_title',
-    'settings' => array (
-      'max_length' => '255',
-    ),
-    'type' => 'text',
-    'module' => 'text',
-    'active' => '1',
-    'cardinality' => '1',
-    'deleted' => '0',
-  );
-  field_create_field($field);
-}
-
-/**
- * Define field haupt_seite_toggle. Use utility function to add instance.
- */
-function share_light_update_1() {
-  $field = array (
-    'global_block_settings' => '1',
-    'field_name' => 'share_light_toggle',
-    'settings' => array (
-      'allowed_values' => array (
-        0 => '',
-        1 => '',
-      ),
-    ),
-    'type' => 'list_boolean',
-    'module' => 'list',
-    'active' => '1',
-    'cardinality' => '1',
-    'deleted' => '0',
-  );
-  field_create_field($field);
-}
-/**
- * Utility function that let's you conveniently add instances
- * of the haupt_seite_toggle field to your content-type.
- */
-function _share_light_add_field_share_light_title($bundle) {
-  $instance = array (
-    'bundle' => $bundle,
-    'label' => 'Share box title text',
-    'widget' => array (
-      'weight' => '8',
-      'type' => 'text_textfield',
-      'module' => 'text',
-      'active' => 1,
-      'settings' => array (
-        'size' => '60',
-      ),
-    ),
-    'display' => array (
-      'default' => array (
-        'label' => 'hidden',
-        'type' => 'hidden',
-      ),
-    ),
-    'required' => 0,
-    'description' => '',
-    'exclude_cv' => 0,
-    'field_name' => 'share_light_title',
-    'entity_type' => 'node',
-  );
-
-  field_create_instance($instance);
-}
-
-function _share_light_add_field_to_node_type($bundle) {
-  $instance = array (
-    'bundle' => $bundle,
-    'label' => 'Display share box.',
-    'widget' => array (
-      'weight' => '7',
-      'type' => 'options_onoff',
-      'module' => 'options',
-      'active' => 1,
-      'settings' => array (
-        'display_label' => 1,
-      ),
-    ),
-    'display' => array (
-      'default' => array (
-        'label' => 'hidden',
-        'type' => 'hidden',
-      ),
-    ),
-    'required' => 0,
-    'description' => 'Enable to display a share box.',
-    'exclude_cv' => 0,
-    'field_name' => 'share_light_toggle',
-    'entity_type' => 'node',
-  );
-
-  field_create_instance($instance);
-}
-
-/**
- * Implements hook_field_schema().
- */
-function share_light_field_schema($field) {
-  if ($field['type'] == 'share_light') {
-    $columns['toggle'] = array(
-      'type' => 'int',
-      'not null' => FALSE,
-      'default' => 0,
-    );
-    $columns['options'] = array(
-      'type' => 'blob',
-      'not null' => FALSE,
-      'serialize' => TRUE,
-    );
-  return array(
-    'columns' => $columns,
-  );
-  }
-}
-
