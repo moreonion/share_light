@@ -1,6 +1,30 @@
 <?php
 
 /**
+ * Implements hook_schema().
+ */
+function share_light_schema() {
+  $int = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
+  $short_text = array('type' => 'varchar', 'not null' => FALSE, 'length' => 255);
+  $long_text = array('type' => 'text', 'size' => 'big', 'not null' => FALSE);
+
+  $schema['share_light_email_settings'] = array(
+    'fields' => array(
+      'nid' => $int,
+      'page_title' => $short_text,
+      'page_instructions' => $long_text,
+      'page_redirect' => $short_text,
+      'message_edit' => $int,
+      'message_subject' => $short_text,
+      'message_message' => $long_text,
+      'message_footer' => $long_text,
+    ),
+    'primary key' => array('nid'),
+  );
+  return $schema;
+}
+
+/**
  * Implements hook_field_schema().
  */
 function share_light_field_schema($field) {
@@ -48,6 +72,30 @@ function _share_light_set_channel_default_states() {
   }
   $default_channels['pinterest'] = 0;
   variable_set('share_light_channels_enabled', $default_channels);
+}
+
+/**
+ * Create share_light_email_settings table.
+ */
+function share_light_update_6() {
+  $int = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
+  $short_text = array('type' => 'varchar', 'not null' => FALSE, 'length' => 255);
+  $long_text = array('type' => 'text', 'size' => 'big', 'not null' => FALSE);
+
+  $table = array(
+    'fields' => array(
+      'nid' => $int,
+      'page_title' => $short_text,
+      'page_instructions' => $long_text,
+      'page_redirect' => $short_text,
+      'message_edit' => $int,
+      'message_subject' => $short_text,
+      'message_message' => $long_text,
+      'message_footer' => $long_text,
+    ),
+    'primary key' => array('nid'),
+  );
+  db_create_table('share_light_email_settings', $table);
 }
 
 /**
