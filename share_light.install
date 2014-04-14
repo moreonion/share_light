@@ -50,7 +50,7 @@ function share_light_install() {
   $default['options']['subject'] = '';
 
   // create new field
-  _field_info_collate_types();
+  _field_info_collate_types(TRUE);
   $field = \Drupal\little_helpers\Field\Field::fromType('share_light', 'share_light');
   $field->settings = array();
   $field->save();
