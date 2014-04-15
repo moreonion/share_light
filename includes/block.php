@@ -25,16 +25,6 @@ function share_light_block_info() {
  * @return renderable array
  */
 function share_light_block_view($id, $link = NULL, $options = array()) {
-  if (isset($_GET['share'])) {
-    $options['share_url'] = $_GET['share'];
-  }
-  if ($link) {
-    if (!is_array($link)) {
-      $link = array('path' => $link);
-    }
-    $options['share_url'] = $link['path'];
-  }
-
   // Load options from the currently displayed node.
   if ($node = menu_get_object()) {
     if ($item = _share_light_field_config_by_node($node, 'share_light')) {
@@ -48,14 +38,25 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
     }
   }
 
-  // Global defaults
-  $defaults = _share_light_defaults();
-  $options += $defaults['options'];
-
   // overrides based on the current page / shared page.
+  if (empty($options['share_url']) && isset($_GET['share'])) {
+    $options['share_url'] = $_GET['share'];
+  }
+
   if (empty($options['share_url'])) {
     $options['share_url'] = current_path();
   }
+
+  if ($link) {
+    if (!is_array($link)) {
+      $link = array('path' => $link);
+    }
+    $options['share_url'] = $link['path'];
+  }
+
+  // Global defaults
+  $defaults = _share_light_defaults();
+  $options += $defaults['options'];
 
   drupal_alter('share_light_options', $options);
 
