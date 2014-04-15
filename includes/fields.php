@@ -168,6 +168,10 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
 
   $weight = 10;
   foreach ($enabled_channels as $channel_name => $channel_value) {
+    if (!isset($available_channels[$channel_name])) {
+      continue;
+    }
+
     $title = $available_channels[$channel_name];
     $ctoggle_id = drupal_html_id('share-light-channel-' . $channel_name . '-toggle');
     $element['options']['advanced']['channel_'.$channel_name.'_toggle'] = array(
