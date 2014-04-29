@@ -76,6 +76,17 @@ function _share_light_set_channel_default_states() {
 }
 
 /**
+ * forward -> email
+ */
+function share_light_update_7() {
+  $rpl = <<<EOX
+share_light_options=REPLACE(share_light_options, ':22:"channel_forward_toggle"', ':20:"channel_email_toggle')
+EOX;
+  db_query("UPDATE {field_data_share_light} SET $rpl");
+  db_query("UPDATE {field_revision_share_light} SET $rpl");
+}
+
+/**
  * Create share_light_email_settings table.
  */
 function share_light_update_6() {
