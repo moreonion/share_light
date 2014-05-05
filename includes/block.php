@@ -26,7 +26,14 @@ function share_light_block_info() {
  */
 function share_light_block_view($id, $link = NULL, $options = array()) {
   // Load options from the currently displayed node.
-  if ($node = menu_get_object()) {
+  $node = NULL;
+  if (!($node = menu_get_object())) {
+    $nid = array_pop(explode('/', $link));
+    if (is_numeric($nid)) { 
+      $node = node_load($nid);
+    }
+  }
+  if ($node) {
     if ($item = _share_light_field_config_by_node($node, 'share_light')) {
       if ($item['toggle'] == '0') {
         return NULL;
