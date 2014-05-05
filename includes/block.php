@@ -65,6 +65,9 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
 
   // try to use a default image url if no image url is saved (yet)
   $image_default_fields = variable_get('share_light_image_default_fields', array());
+  if (!is_array($image_default_fields)) {
+    $image_default_fields = array($image_default_fields);
+  }
   // an fid of 0 gets saved if no image is selected
   // @TODO deal with the case somebody explicitly does not want to
   // share a default field
