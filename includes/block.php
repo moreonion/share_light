@@ -28,8 +28,9 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   // Load options from the currently displayed node.
   $node = NULL;
   if (!($node = menu_get_object())) {
-    $nid = array_pop(explode('/', $link));
-    if (is_numeric($nid)) { 
+    $count = 0;
+    $nid = preg_replace('/^.*\/(\d+)$/', '$1', $link, -1, $count);
+    if ($count) {
       $node = node_load($nid);
     }
   }
