@@ -55,7 +55,7 @@ function share_light_install() {
   $field->settings = array();
   $field->save();
 
-  _share_light_set_channel_default_states();
+  variable_set('share_light_channels_enabled', _share_light_default_channels());
 }
 
 function share_light_update_last_removed() {
@@ -63,16 +63,17 @@ function share_light_update_last_removed() {
 }
 
 /**
- * helper function to set channel defaults.
+ * Default enabled channels.
+ *
+ * Everything but pinterest is enabled by default.
  */
-function _share_light_set_channel_default_states() {
-  // every channel but pinterest is enabled by default
-  $default_channels = _share_light_channels();
-  foreach ($default_channels as $channel_name => $channel_title) {
-    $default_channels[$channel_name] = $channel_name;
+function _share_light_default_channels() {
+  $channels = array();
+  foreach (arra_keys(_share_light_channels()) as $name) {
+    $channels[$name] = $name;
   }
-  $default_channels['pinterest'] = 0;
-  variable_set('share_light_channels_enabled', $default_channels);
+  $channels['pinterest'] = 0;
+  return $channels;
 }
 
 /**
@@ -84,6 +85,13 @@ share_light_options=REPLACE(share_light_options, ':22:"channel_forward_toggle"',
 EOX;
   db_query("UPDATE {field_data_share_light} SET $rpl");
   db_query("UPDATE {field_revision_share_light} SET $rpl");
+
+  $channels = variable_get('share_light_channels_enabled', _share_light_default_channels());
+  if (isset($channels['forward'])) {
+    $channels['email'] = $channels['forward'];
+    unset($channels['forward']);
+    variable_set('share_light_channels_enabled', $channels);
+  }
 }
 
 /**
