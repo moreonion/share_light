@@ -69,7 +69,7 @@ function share_light_update_last_removed() {
  */
 function _share_light_default_channels() {
   $channels = array();
-  foreach (arra_keys(_share_light_channels()) as $name) {
+  foreach (array_keys(_share_light_channels()) as $name) {
     $channels[$name] = $name;
   }
   $channels['pinterest'] = 0;
@@ -88,7 +88,7 @@ EOX;
 
   $channels = variable_get('share_light_channels_enabled', _share_light_default_channels());
   if (isset($channels['forward'])) {
-    $channels['email'] = $channels['forward'];
+    $channels['email'] = $channels['forward'] ? 'email' : 0;
     unset($channels['forward']);
     variable_set('share_light_channels_enabled', $channels);
   }
