@@ -93,6 +93,16 @@ function share_light_menu() {
   return $items;
 }
 
+/**
+ * Implements hook_permission().
+ */
+function share_light_permission() {
+  $permissions['administer share'] = array(
+    'title'       => t('Administer share light settings'),
+    'description' => t('Administer site-wide settings for share light.'),
+  );
+  return $permissions;
+}
 
 /**
  * Implements hook_tokens().
