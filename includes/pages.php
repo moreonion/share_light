@@ -230,7 +230,7 @@ function share_light_node_email_form_submit($form, &$form_state) {
   $values['footer'] = token_replace($defaults['share_light_email_message_footer'], $tokens);
   $tokens['share']['url'] = $values['url'] = url('node/' . $node->nid, $pathOptions);
 
-  $message = token_replace(theme('share_light_email_message_body', array(
+  $message = token_replace(theme('share_light_message_body', array(
     'node' => $node,
     'values' => $values,
   )), $tokens);
