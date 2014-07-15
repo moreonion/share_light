@@ -46,47 +46,46 @@ function _share_light_defaults() {
   return $default;
 }
 
-
-
 /**
  * Implements hook_menu().
  */
 function share_light_menu() {
   $items['node/%node/share'] = array(
-    'page callback' => 'share_light_node_email_page',
-    'page arguments' => array(1),
-    'access callback' => 'node_access',
+    'page callback'    => 'share_light_node_email_page',
+    'page arguments'   => array(1),
+    'access callback'  => 'node_access',
     'access arguments' => array('view', 1),
-    'file' => 'includes/pages.php',
-    'type' => MENU_CALLBACK,
+    'file'             => 'includes/pages.php',
+    'type'             => MENU_CALLBACK,
   );
   $items['node/%node/share-settings'] = array(
     'title'            => 'E-Mail share',
     'description'      => 'Configure settings for sharing this node via e-mail.',
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('share_light_node_email_settings', 1),
-    'access arguments' => array('administer share'),
-    'file' => 'includes/admin_pages.php',
-    'type' => MENU_LOCAL_TASK,
+    'access callback'  => array('share_light_access'),
+    'access arguments' => array(1),
+    'file'             => 'includes/admin_pages.php',
+    'type'             => MENU_LOCAL_TASK,
   );
   $items['admin/config/content/share-light'] = array(
-    'title' => t('Share light'),
-    'page callback'  => 'drupal_get_form',
-    'page arguments' => array('share_light_settings_form'),
-    'description'    => 'Share light settings.',
-    'file'           => 'includes/admin_pages.php',
-    'access arguments' => array('administer share'),
+    'title'            => t('Share light'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('share_light_settings_form'),
+    'description'      => 'Share light settings.',
+    'file'             => 'includes/admin_pages.php',
+    'access arguments' => array('admin share_light global'),
   );
   $items['admin/config/content/share-light/block'] = array(
     'title' => t('Block settings'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'type'  => MENU_DEFAULT_LOCAL_TASK,
   ) + $items['admin/config/content/share-light'];
   $items['admin/config/content/share-light/email'] = array(
     'description'      => 'Email settings.',
     'title'            => 'Share via E-Mail',
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('share_light_email_admin_form'),
-    'access arguments' => array('administer share'),
+    'access arguments' => array('admin share_light global'),
     'file'             => 'includes/admin_pages.php',
     'type'             => MENU_LOCAL_TASK,
   );
@@ -97,11 +96,36 @@ function share_light_menu() {
  * Implements hook_permission().
  */
 function share_light_permission() {
-  $permissions['administer share'] = array(
-    'title'       => t('Administer share light settings'),
-    'description' => t('Administer site-wide settings for share light.'),
+  return array(
+    'admin share_light global' => array(
+      'title'       => t('Administer global share_light settings'),
+      'description' => t('Administer site-wide settings for share_light.'),
+    ),
+    'admin share_light own page' => array(
+      'title'       => t('Administer share_light settings for own content'),
+      'description' => t('Administer share_light settings on content that the user created.'),
+    ),
+   'admin share_light all pages' => array(
+      'title'       => t('Administer share_light settings for all pages'),
+      'description' => t('Administer share_light settings for all pages.'),
+    ),
   );
-  return $permissions;
+}
+
+/**
+ * access callback set in hook_menu().
+ */
+function share_light_access($node) {
+  global $user;
+
+  if (user_access('admin share_light all pages')) {
+    return TRUE;
+  }
+  elseif (user_access('admin share_light own page') && $user->uid == $node->uid) {
+    return TRUE;
+  }
+
+  return FALSE;
 }
 
 /**
