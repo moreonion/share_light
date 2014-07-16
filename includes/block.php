@@ -92,6 +92,9 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   $links = array();
   // display the enabled channels
   $channels = variable_get('share_light_channels_enabled', _share_light_channels());
+  if (user_access('admin share_light share page') == FALSE) {
+    $channels['email'] = 0;
+  }
   foreach ($channels as $channel_name => $channel_value) {
     if ($channel_value) {
       if (!isset($options['advanced']['channel_'.$channel_name.'_toggle']) ||

@@ -53,8 +53,7 @@ function share_light_menu() {
   $items['node/%node/share'] = array(
     'page callback'    => 'share_light_node_email_page',
     'page arguments'   => array(1),
-    'access callback'  => 'node_access',
-    'access arguments' => array('view', 1),
+    'access arguments' => array('admin share_light share page'),
     'file'             => 'includes/pages.php',
     'type'             => MENU_CALLBACK,
   );
@@ -109,6 +108,11 @@ function share_light_permission() {
       'title'       => t('Administer share_light settings for all pages'),
       'description' => t('Administer share_light settings for all pages.'),
     ),
+    'admin share_light share page' => array(
+      'title'       => t('Share the page via email'),
+      'description' => t('Permission to share the page via email.'),
+    ),
+
   );
 }
 
