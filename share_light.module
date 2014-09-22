@@ -184,3 +184,97 @@ function share_light_mail($key, &$message, $params) {
   $message['subject'] = $params['subject'];
   $message['body'][] = $params['message'];
 }
+
+/**
+ * Implements hook_variable_group_info().
+ */
+function share_light_variable_group_info() {
+  $groups['share_light_settings'] = array(
+    'title' => t('Share light settings'),
+    'description' => t('Site wide share_light settings.'),
+    'access' => 'admin share_light global',
+    'path' => array('admin/config/content/share-light', 'admin/config/content/share-light/block', 'admin/config/content/share-light/email'),
+  );
+  return $groups;
+}
+
+/**
+ * Implements hook_variable_info().
+ */
+function share_light_variable_info() {
+  $vars = array();
+  $vars['channels_enabled'] = array(
+    'title' => t('Enable social media channels for sharing.'),
+    'description' => t('The social media channels available for sharing.'),
+    'default' => array_keys(_share_light_channels()),
+  );
+  $vars['email_page_title'] = array(
+    'title' => t('Title'),
+    'description' => t('Title to display above the share via email form'),
+    'default' => t('Forward this page to a friend'),
+    'localize' => TRUE,
+  );
+  $vars['page_noindex'] = array(
+    'title' => t('Generate a noindex meta-tag on the share via email page'),
+    'default' => TRUE,
+  );
+  $vars['page_instructions'] = array(
+    'title' => t('Share instructions'),
+    'description' => t('This message will be displayed above the form. The token [site:name] will be replaced with the site name.'),
+    'default' => '',
+    'localize' => TRUE,
+  );
+  $vars['email_page_redirect'] = array(
+    'title' => t('Redirect path'),
+    'description' => t('Path to the page that to user is redirected to after submitting the share form.'),
+    'default' => '',
+    'localize' => TRUE,
+  );
+  $vars['email_message_edit'] = array(
+    'title' => t('Users can edit the message.'),
+    'description' => t('Choose whether users can edit the share message.'),
+    'default' => FALSE,
+  );
+  $vars['email_message_subject'] = array(
+    'title' => t('Subject'),
+    'description' => t('Email subject line. Replacement tokens, as found below, may be used'),
+    'default' => t('[share:sender] has forwarded a page to you from [site:name]'),
+    'localize' => TRUE,
+  );
+  $vars['email_message_message'] = array(
+    'title' => t('Message Body'),
+    'description' => t('Email message body. Replacement tokens, as found below, may be used. The sender will be able to add their own message after this.'),
+    'default' => t('[share:sender] thought you would like to see this page from the [site:name] web site.'),
+    'localize' => TRUE,
+  );
+  $vars['email_message_footer'] = array(
+    'title' => t('Footer'),
+    'description' => t("This part of the message is rendered below the user's message and is not editable by the user."),
+    'default' => t('Visit our site on [share:url].'),
+    'localize' => TRUE,
+  );
+  $vars['email_flood_control'] = array(
+    'title' => t('Flood control limit'),
+    'description' => t('How many times a user can use the form in a one hour period. This will help prevent the email form from being used for spamming.'),
+    'default' => 100,
+  );
+  $vars['email_flood_error'] = array(
+    'title' => t('Flood control error'),
+    'description' => t('This text appears if a user exceeds the flood control limit.  The value of the flood control limit setting will appear in place of !number in the message presented to users'),
+    'default' => t("You can't send more than !number messages per hour. Please try again later."),
+    'localize' => TRUE,
+  );
+  $vars['email_flood_clicks'] = array(
+    'default' => 3,
+  );
+
+  // Add module prefix and group.
+  $variables = array();
+  foreach ($vars as $key => $value) {
+    $variables['share_light_' . $key] = $value + array(
+      'group' => 'share_light_settings',
+    );
+  }
+  return $variables;
+}
+
