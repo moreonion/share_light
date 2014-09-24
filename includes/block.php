@@ -48,7 +48,7 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
 
   // add tracking for GA if googleanalytics module is enabled
   // and share tracking is enabled (default: enabled)
-  $tracking_enabled = module_exists('googleanalytics')) && variable_get('share_light_tracking_enabled', '1') == '1');
+  $tracking_enabled = module_exists('googleanalytics') && variable_get('share_light_tracking_enabled', '1') == '1';
   if ($tracking_enabled) {
     drupal_add_js(drupal_get_path('module', 'share_light') . '/tracking.js');
   }
