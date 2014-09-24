@@ -46,6 +46,13 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
     }
   }
 
+  // add tracking for GA if googleanalytics module is enabled
+  // and share tracking is enabled (default: enabled)
+  $tracking_enabled = module_exists('googleanalytics')) && variable_get('share_light_tracking_enabled', '1') == '1');
+  if ($tracking_enabled) {
+    drupal_add_js(drupal_get_path('module', 'share_light') . '/tracking.js');
+  }
+
   // overrides based on the current page / shared page.
   if (empty($options['share_url']) && isset($_GET['share'])) {
     $options['share_url'] = $_GET['share'];
@@ -130,7 +137,10 @@ function _share_light_channel_facebook($url, $options, $link) {
     'title' => 'Facebook',
     'href' => 'https://www.facebook.com/sharer.php',
     'query' => array('u' => urlencode($url)),
-    'attributes' => array('title' => t('Share this via Facebook!'))
+    'attributes' => array(
+      'title' => t('Share this via Facebook!'),
+      'data-share' => 'Facebook',
+    ),
   );
 }
 function _share_light_channel_twitter($url, $options, $link) {
@@ -139,7 +149,10 @@ function _share_light_channel_twitter($url, $options, $link) {
     'title' => 'Twitter',
     'href' => 'http://twitter.com/share',
     'query' => array('text' => $text, 'url' => $url),
-    'attributes' => array('title' => t('Share this via Twitter!'))
+    'attributes' => array(
+      'title' => t('Share this via Twitter!'),
+      'data-share' => 'Twitter',
+    ),
   );
 }
 function _share_light_channel_pinterest($url, $options, $link) {
@@ -154,7 +167,10 @@ function _share_light_channel_pinterest($url, $options, $link) {
         'title' => 'Pinterest',
         'href' => 'http://www.pinterest.com/pin/create/button/',
         'query' => array('url' => $url, 'media' => $media_url, 'description' => $text),
-        'attributes' => array('title' => t('Share this via Pinterest!'))
+        'attributes' => array(
+          'title' => t('Share this via Pinterest!'),
+          'data-share' => 'Pinterest',
+        ),
       );
     }
   }
@@ -172,7 +188,10 @@ function _share_light_channel_email($url, $options, $link) {
       'title' => 'E-Mail',
       'href' => $link['path'] . '/share',
       'query' => $query,
-      'attributes' => array('title' => t('Share this via E-Mail!'))
+      'attributes' => array(
+        'title' => t('Share this via E-Mail!'),
+        'data-share' => 'E-Mail',
+      ),
     );
   }
 }

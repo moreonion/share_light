@@ -7,6 +7,14 @@ require_once dirname(__FILE__) . '/pages.php';
  */
 function share_light_settings_form() {
 
+  $form['share_light_tracking_enabled'] = array(
+    '#title' => t('Enable tracking of share link clicks.'),
+    '#type' => 'checkbox',
+    '#access' => module_exists('googleanalytics'),
+    '#description' => t('If set to "1" and tracking modules are enabled, then tracking events will be sent to Google Analytics.'),
+    '#default_value' => variable_get('share_light_tracking_enabled', '1'),
+  );
+
   $form['share_light_channels_enabled'] = array(
     '#title' => t('Enable social media channels for sharing.'),
     '#type' => 'checkboxes',
