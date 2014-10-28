@@ -46,13 +46,6 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
     }
   }
 
-  // add tracking for GA if googleanalytics module is enabled
-  // and share tracking is enabled (default: enabled)
-  $tracking_enabled = module_exists('googleanalytics') && variable_get('share_light_tracking_enabled', '1') == '1';
-  if ($tracking_enabled) {
-    drupal_add_js(drupal_get_path('module', 'share_light') . '/tracking.js');
-  }
-
   // overrides based on the current page / shared page.
   if (empty($options['share_url']) && isset($_GET['share'])) {
     $options['share_url'] = $_GET['share'];
@@ -61,6 +54,17 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
   if (empty($options['share_url'])) {
     $options['share_url'] = current_path();
   }
+
+  // add tracking for GA if googleanalytics module is enabled
+  // and share tracking is enabled (default: enabled)
+  $tracking_enabled = module_exists('googleanalytics') && variable_get('share_light_tracking_enabled', '1') == '1';
+  if ($tracking_enabled) {
+    drupal_add_js(drupal_get_path('module', 'share_light') . '/tracking.js');
+    drupal_add_js(array('share_light' => array(
+      'share_url' => $options['share_url'],
+    )), 'setting');
+  }
+
 
   if ($link) {
     if (!is_array($link)) {
@@ -139,7 +143,7 @@ function _share_light_channel_facebook($url, $options, $link) {
     'query' => array('u' => urlencode($url)),
     'attributes' => array(
       'title' => t('Share this via Facebook!'),
-      'data-share' => 'Facebook',
+      'data-share' => 'facebook',
     ),
   );
 }
@@ -151,7 +155,7 @@ function _share_light_channel_twitter($url, $options, $link) {
     'query' => array('text' => $text, 'url' => $url),
     'attributes' => array(
       'title' => t('Share this via Twitter!'),
-      'data-share' => 'Twitter',
+      'data-share' => 'twitter',
     ),
   );
 }
@@ -169,7 +173,7 @@ function _share_light_channel_pinterest($url, $options, $link) {
         'query' => array('url' => $url, 'media' => $media_url, 'description' => $text),
         'attributes' => array(
           'title' => t('Share this via Pinterest!'),
-          'data-share' => 'Pinterest',
+          'data-share' => 'pinterest',
         ),
       );
     }
@@ -190,7 +194,7 @@ function _share_light_channel_email($url, $options, $link) {
       'query' => $query,
       'attributes' => array(
         'title' => t('Share this via E-Mail!'),
-        'data-share' => 'E-Mail',
+        'data-share' => 'email',
       ),
     );
   }
