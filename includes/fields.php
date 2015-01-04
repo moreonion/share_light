@@ -105,7 +105,8 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     $item = $instance['default_value'][$delta];
   }
 
-  $available_channels = _share_light_channels();
+  $loader = Loader::instance();
+  $available_channels = $loader->channelOptions();
   $enabled_channels = variable_get('share_light_channels_enabled', $available_channels);
 
   $item = drupal_array_merge_deep(_share_light_defaults(), $item);

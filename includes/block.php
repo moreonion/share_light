@@ -5,6 +5,8 @@
  * Block related functions.
  */
 
+use \Drupal\share_light\Loader;
+
 /**
  * Implements hook_block_info().
  */
@@ -102,20 +104,14 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
 
   $links = array();
   // display the enabled channels
-  $channels = variable_get('share_light_channels_enabled', _share_light_channels());
-  if (user_access('admin share_light share page') == FALSE) {
-    $channels['email'] = 0;
-  }
+  $channels = variable_get('share_light_channels_enabled', Loader::instance()->channelOptions());
   foreach ($channels as $channel_name => $channel_value) {
     if ($channel_value) {
       if (!isset($options['advanced']['channel_'.$channel_name.'_toggle']) ||
         $options['advanced']['channel_'.$channel_name.'_toggle'] == 1) {
-        $call_name = '_share_light_channel_' . $channel_name;
-        if (function_exists($call_name)) {
-          $channel_link = $call_name($url, $options, $link);
-          if ($channel_link) {
-            $links[$channel_name] = $channel_link;
-          }
+        $channel = Loader::instance()->channel($channel_name);
+        if($channel_link = $channel->render($url, $options, $link)) {
+          $links[$channel_name] = $channel_link;
         }
       }
     }
@@ -134,68 +130,4 @@ function share_light_block_view($id, $link = NULL, $options = array()) {
     '#attributes' => array('class' => array('share-light')),
   );
   return $v;
-}
-
-function _share_light_channel_facebook($url, $options, $link) {
-  return array(
-    'title' => 'Facebook',
-    'href' => 'https://www.facebook.com/sharer.php',
-    'query' => array('u' => urlencode($url)),
-    'attributes' => array(
-      'title' => t('Share this via Facebook!'),
-      'data-share' => 'facebook',
-    ),
-  );
-}
-function _share_light_channel_twitter($url, $options, $link) {
-  $text = isset($options['advanced']['channel_twitter_text']) ? $options['advanced']['channel_twitter_text'] : '';
-  return array(
-    'title' => 'Twitter',
-    'href' => 'http://twitter.com/share',
-    'query' => array('text' => $text, 'url' => $url),
-    'attributes' => array(
-      'title' => t('Share this via Twitter!'),
-      'data-share' => 'twitter',
-    ),
-  );
-}
-function _share_light_channel_pinterest($url, $options, $link) {
-  $text = isset($options['advanced']['channel_pinterest_text']) ? $options['advanced']['channel_pinterest_text'] : '';
-
-  // get the url from the media object
-  $media_url = '';
-  if (!empty($options['image']->type)) {
-    if ($options['image']->type == 'image' && ($image = image_load($options['image']->uri))) {
-      $media_url = file_create_url($image->source);
-      return array(
-        'title' => 'Pinterest',
-        'href' => 'http://www.pinterest.com/pin/create/button/',
-        'query' => array('url' => $url, 'media' => $media_url, 'description' => $text),
-        'attributes' => array(
-          'title' => t('Share this via Pinterest!'),
-          'data-share' => 'pinterest',
-        ),
-      );
-    }
-  }
-}
-
-function _share_light_channel_email($url, $options, $link) {
-  $query['path'] = $link['path'];
-  if (isset($link['query'])) {
-    $query['query'] = $link['query'];
-  }
-  $parts = explode('/', $query['path']);
-  if (count($parts) == 2 && $parts[0] == 'node' && is_numeric($parts[1])) {
-    unset($query['path']);
-    return array(
-      'title' => 'E-Mail',
-      'href' => $link['path'] . '/share',
-      'query' => $query,
-      'attributes' => array(
-        'title' => t('Share this via E-Mail!'),
-        'data-share' => 'email',
-      ),
-    );
-  }
 }

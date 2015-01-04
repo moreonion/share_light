@@ -7,3 +7,4 @@ version = "7.x-0.4"
 
 dependencies[] = little_helpers
 dependencies[] = media
+dependencies[] = psr0

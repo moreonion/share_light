@@ -1,5 +1,7 @@
 <?php
 
+use \Drupal\share_light\Loader;
+
 /**
  * Implements hook_schema().
  */
@@ -69,7 +71,7 @@ function share_light_update_last_removed() {
  */
 function _share_light_default_channels() {
   $channels = array();
-  foreach (array_keys(_share_light_channels()) as $name) {
+  foreach (array_keys(Loader::instance()->channelOptions()) as $name) {
     $channels[$name] = $name;
   }
   $channels['pinterest'] = 0;
@@ -86,7 +88,7 @@ EOX;
   db_query("UPDATE {field_data_share_light} SET $rpl");
   db_query("UPDATE {field_revision_share_light} SET $rpl");
 
-  $channels = variable_get('share_light_channels_enabled', _share_light_default_channels());
+  $channels = variable_get('share_light_channels_enabled', Loader::instance()->channelOptions());
   if (isset($channels['forward'])) {
     $channels['email'] = $channels['forward'] ? 'email' : 0;
     unset($channels['forward']);

@@ -7,21 +7,10 @@
  * must be loaded in every request.
  */
 
+use \Drupal\share_light\Loader;
+
 require_once dirname(__FILE__) . '/includes/block.php';
 require_once dirname(__FILE__) . '/includes/fields.php';
-
-/**
- * helper config function.
- */
-function _share_light_channels() {
-  // return the known channles indexed by channel name
-  return array(
-    'twitter' => t('Twitter'),
-    'facebook' => t('Facebook'),
-    'email' => t('Email'),
-    'pinterest' => t('Pinterest'),
-  );
-}
 
 function _share_light_defaults() {
   $default = array(
@@ -206,7 +195,7 @@ function share_light_variable_info() {
   $vars['channels_enabled'] = array(
     'title' => t('Enable social media channels for sharing.'),
     'description' => t('The social media channels available for sharing.'),
-    'default' => array_keys(_share_light_channels()),
+    'default' => array_keys(Loader::instance()->channelOptions()),
   );
   $vars['email_page_title'] = array(
     'title' => t('Title'),
@@ -278,3 +267,13 @@ function share_light_variable_info() {
   return $variables;
 }
 
+/**
+ * Implements hook_share_light_channel_info().
+ */
+function share_light_share_light_channel_info() {
+  $channels['email'] = '\\Drupal\\share_light\\Email';
+  $channels['facebook'] = '\\Drupal\\share_light\\Facebook';
+  $channels['twitter'] = '\\Drupal\\share_light\\Twitter';
+  $channels['pinterest'] = '\\Drupal\\share_light\\Pinterest';
+  return $channels;
+}
