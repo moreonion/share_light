@@ -2,9 +2,10 @@
 
 namespace Drupal\share_light;
 
-class Facebook implements ChannelInterface {
+class Facebook extends ChannelBase {
   public static function title() { return t('Facebook'); }
-  public function render($url, $options, $link) {
+  public function render() {
+    $url = $this->block->getUrl();
     return array(
       'title' => 'Facebook',
       'href' => 'https://www.facebook.com/sharer.php',

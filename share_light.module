@@ -12,29 +12,6 @@ use \Drupal\share_light\Loader;
 require_once dirname(__FILE__) . '/includes/block.php';
 require_once dirname(__FILE__) . '/includes/fields.php';
 
-function _share_light_defaults() {
-  $default = array(
-    'toggle' => variable_get('share_light_default_toggle', 1),
-    'options' => array (
-      'subject' => t('Share this page!'),
-      'share_url' => '',
-      'counter_toggle' => variable_get('share_light_default_counter_toggle', 1),
-      'advanced' => array (
-        'channel_facebook_toggle' => 1,
-        'channel_email_toggle' => 1,
-        'channel_pinterest_toggle' => 1,
-        'channel_pinterest_text' => '',
-        'channel_twitter_toggle' => 1,
-        'channel_twitter_text' => '',
-      ),
-      'image' => array(
-        'fid' => 0,
-      ),
-    ),
-  );
-  return $default;
-}
-
 /**
  * Implements hook_menu().
  */

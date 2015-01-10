@@ -5,6 +5,9 @@
  * Field related functions.
  */
 
+use \Drupal\share_light\Loader;
+use \Drupal\share_light\Block;
+
 /**
  * Implements hook_field_info().
  */
@@ -52,35 +55,6 @@ function share_light_field_is_empty($item, $field) {
 }
 
 /**
- * Utility function: returns all field items by field type in array
- * (indexed by field name)
- */
-function _share_light_field_config_by_node($node, $field_type) {
-  $instances = field_info_instances('node', $node->type);
-  foreach ($instances as $instance) {
-    $field_info = field_info_field($instance['field_name']);
-    if ($field_info['type'] == $field_type) {
-      $item = field_get_items('node', $node, $instance['field_name']);
-      $data = array();
-      if ($item) {
-        $data += $item[0];
-      }
-      if (empty($data['options']['subject'])) {
-        unset($data['options']['subject']);
-      }
-      if (count($instance['default_value'])) {
-        $data += $instance['default_value'][0];
-      }
-      if (empty($data['options']['subject'])) {
-        unset($data['options']['subject']);
-      }
-      return $data;
-    }
-  }
-  return array();
-}
-
-/**
  * Implements hook_field_widget_info().
  */
 function share_light_field_widget_info() {
@@ -104,14 +78,13 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
   if (isset($instance['default_value'][$delta]) && !isset($items[$delta])) {
     $item = $instance['default_value'][$delta];
   }
-
-  $loader = Loader::instance();
-  $available_channels = $loader->channelOptions();
-  $enabled_channels = variable_get('share_light_channels_enabled', $available_channels);
-
-  $item = drupal_array_merge_deep(_share_light_defaults(), $item);
+  $item = drupal_array_merge_deep(array(
+    'toggle' => variable_get('share_light_default_toggle', 1),
+    'options' => Block::defaults(),
+  ), $item);
 
   $toggle_id = drupal_html_id('share-light-widget-toggle');
+  $element['#element_validate'][] = '_share_light_transform_options';
   $element['toggle'] = array(
     '#title' => t('Display a share block.'),
     '#description' => t('Display a share block.'),
@@ -141,7 +114,7 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     '#description' => t('URL to be shared. Leave this empty to share the current page.'),
     '#type' => 'textfield',
     '#size' => 60,
-    '#default_value' => $item['options']['share_url'],
+    '#default_value' => $item['options']['link']['path'],
   );
 
   $element['options']['image'] = array(
@@ -160,73 +133,58 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     '#access' => FALSE, // TODO
 );
 
-  $element['options']['advanced'] = array(
+  $element['options']['channels'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced share options'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
 
-  $weight = 10;
-  foreach ($enabled_channels as $channel_name => $channel_value) {
-    if (!isset($available_channels[$channel_name])) {
-      continue;
-    }
-
-    $title = $available_channels[$channel_name];
+  $loader = Loader::instance();
+  $available_channels = $loader->channelOptions();
+  foreach ($available_channels as $channel_name => $title) {
     $ctoggle_id = drupal_html_id('share-light-channel-' . $channel_name . '-toggle');
-    $element['options']['advanced']['channel_'.$channel_name.'_toggle'] = array(
+    $element['options']['channels']['toggle_' . $channel_name] = array(
       '#title' => t('Show '.$title.' share button.'),
       '#description' => t('Enable '.$title.' on this page.'),
       '#type' => 'checkbox',
-      '#default_value' => $item['options']['advanced']['channel_'.$channel_name.'_toggle'],
-      '#access' => $channel_value ? TRUE : FALSE,
-      '#weight' => $weight,
+      '#default_value' => $item['options']['channels'][$channel_name]['toggle'],
       '#attributes' => array('id' => $ctoggle_id),
     );
 
-    // needs a text field
-    if ($channel_name == 'twitter' || $channel_name == 'pinterest') {
-      $title = $available_channels[$channel_name];
-      $textarea =  array(
-        '#title' => t('Share text for ' . $title . '.'),
-        '#description' => t('Share text for ' . $title . '.'),
-        '#type' => 'textarea',
-        '#cols' => 60,
-        '#rows' => 2,
-        '#maxlength' => 225,
-        '#attributes' => array(),
-        '#default_value' => $item['options']['advanced']['channel_'.$channel_name.'_text'],
-        '#access' => $channel_value ? TRUE : FALSE,
-        '#weight' => $element['options']['advanced']['channel_'.$channel_name.'_toggle']['#weight'] + 1,
-        '#states' => array(
-          'visible' => array(
-            '#' . $ctoggle_id => array('checked' => TRUE),
-          ),
+    $element['options']['channels']['options_' . $channel_name] = array(
+      '#type' => 'container',
+      '#states' => array(
+        'visible' => array(
+          '#' . $ctoggle_id => array('checked' => TRUE),
         ),
-      );
-      // Twitter
-      if ($channel_name == 'twitter') {
-        $textarea['#title'] = t('Tweet text for ' . $title . '.');
-        $textarea['#description'] = t('Tweet text for ' . $title . '.');
-        $textarea['#maxlength'] = 116; // = 140 - 1 - 23 (tweet max-length - space - url in https)
+      ),
+    );
+    $channel_options = &$element['options']['channels']['options_' . $channel_name];
 
-      // Pinterest
-      } else if ($channel_name == 'pinterest') {
-        $textarea['#title'] = t('Description text for ' . $title . '.');
-        $textarea['#description'] = t('Description text for ' . $title . '.');
-        $textarea['#maxlength'] = 500; // the pinterest max-length for descriptions
-      }
-
-      $element['options']['advanced']['channel_'.$channel_name.'_text'] = $textarea;
-    }
-
-    $weight += 10;
+    $class = $loader->channelClass($channel_name);
+    $class::optionsWidget($channel_options, $item['options']['channels'][$channel_name]);
   }
 
   return $element;
 }
 
+function _share_light_transform_options($element, &$form_state, $form) {
+  $values = &drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  $loader = Loader::instance();
+  $available_channels = $loader->channelOptions();
+
+  $options = array();
+  foreach ($available_channels as $name => $title) {
+    $options[$name]['toggle'] = !empty($values['options']['channels']['toggle_' . $name]);
+    if (isset($values['options']['channels']['options_' . $name])) {
+      $options[$name] += $values['options']['channels']['options_' . $name];
+    }
+  }
+  $values['options']['channels'] = $options;
+  $values['options']['link']['path'] = $values['options']['share_url'];
+  unset($values['options']['share_url']);
+}
 
 
 /**

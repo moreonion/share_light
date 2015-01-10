@@ -1,6 +1,7 @@
 <?php
 
 use \Drupal\share_light\Loader;
+use \Drupal\share_light\Block;
 
 /**
  * Implements hook_schema().
@@ -48,7 +49,10 @@ function share_light_field_schema($field) {
 }
 
 function share_light_install() {
-  $default = _share_light_defaults();
+  $default = array(
+    'toggle' => variable_get('share_light_default_toggle', 1),
+    'options' => Block::defaults(),
+  );
   $default['options']['subject'] = '';
 
   // create new field
@@ -60,8 +64,15 @@ function share_light_install() {
   variable_set('share_light_channels_enabled', _share_light_default_channels());
 }
 
+function share_light_uninstall() {
+  variable_del('share_light_default_toggle');
+  variable_del('share_light_default_counter_toggle');
+  variable_del('share_light_channels_enabled');
+  variable_del('share_light_tracking_enabled');
+}
+
 function share_light_update_last_removed() {
-  return 3;
+  return 7;
 }
 
 /**
@@ -79,148 +90,55 @@ function _share_light_default_channels() {
 }
 
 /**
- * forward -> email
+ * Update channel option data structure.
  */
-function share_light_update_7() {
-  $rpl = <<<EOX
-share_light_options=REPLACE(share_light_options, ':22:"channel_forward_toggle"', ':20:"channel_email_toggle"')
-EOX;
-  db_query("UPDATE {field_data_share_light} SET $rpl");
-  db_query("UPDATE {field_revision_share_light} SET $rpl");
+function share_light_update_8() {
+  $fields = field_read_fields(array('type' => 'share_light'));
+  foreach ($fields as $field) {
+    $instances = field_read_instances(array('field_name' => $field['field_name']), array('include_inactive' => TRUE));
+    foreach ($instances as $instance) {
+      foreach ($instance['default_value'] as $delta => $item) {
+        $instance['default_value'][$delta]['options'] = _share_light_update_8_options_map($item['options']);
+      }
+      // Avoid calling hook_field_update_instance since i18n will fail badly.
+      _field_write_instance($instance, TRUE);
 
-  $channels = variable_get('share_light_channels_enabled', Loader::instance()->channelOptions());
-  if (isset($channels['forward'])) {
-    $channels['email'] = $channels['forward'] ? 'email' : 0;
-    unset($channels['forward']);
-    variable_set('share_light_channels_enabled', $channels);
-  }
-}
-
-/**
- * Create share_light_email_settings table.
- */
-function share_light_update_6() {
-  $int = array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0);
-  $short_text = array('type' => 'varchar', 'not null' => FALSE, 'length' => 255);
-  $long_text = array('type' => 'text', 'size' => 'big', 'not null' => FALSE);
-
-  $table = array(
-    'fields' => array(
-      'nid' => $int,
-      'page_title' => $short_text,
-      'page_instructions' => $long_text,
-      'page_redirect' => $short_text,
-      'message_edit' => $int,
-      'message_subject' => $short_text,
-      'message_message' => $long_text,
-      'message_footer' => $long_text,
-    ),
-    'primary key' => array('nid'),
-  );
-  db_create_table('share_light_email_settings', $table);
-}
-
-/**
- * Set default enabled channels.
- */
-function share_light_update_5() {
-  _share_light_set_channel_default_states();
-}
-
-/**
- * share_light_toggle --> share_light field type
- */
-function share_light_update_4() {
-  $default = _share_light_defaults();
-  $default['options']['subject'] = '';
-
-  // create new field
-  $field = \Drupal\little_helpers\Field\Field::fromType('share_light', 'share_light');
-  $field->settings = array();
-  $field->save();
-
-  // get needed bundles from old instances
-  $oldinstances = field_read_instances(array('field_name' => 'share_light_toggle', 'entity_type' => 'node'));
-  if (empty($oldinstances)) {
-    return "No fields share_light_toggl_toggle found. Nothing to migrate.";
-  }
-
-  $bundles = array();
-  foreach ($oldinstances as $oldinstance) {
-    $bundles[] = $oldinstance['bundle'];
-  }
-  foreach ($bundles as $bundlename) {
-    $bundle = new \Drupal\little_helpers\Field\Bundle('node', $bundlename);
-    $instance = \Drupal\little_helpers\Field\Instance::fromField($field, $bundle);
-    $instance->label = t('Share options');
-    $instance->description = t('Set the share options for this page.');
-    $instance->widget = array(
-      'module'   => 'share_light',
-      'type'     => 'share_light',
-      'settings' => array(),
-    );
-    $instance->display = array(
-      'default' => array(
-        'label'    => 'hidden',
-        'type'     => 'hidden',
-        'settings' => array(),
-      ),
-      'cck_blocks' => array(
-        'label'    => 'hidden',
-        'type'     => 'hidden',
-        'settings' => array(),
-      ),
-    );
-    $instance->settings = array (
-      'exclude_cv' => false,
-      'custom_add_another' => '',
-      'custom_remove' => '',
-      'user_register_form' => false,
-    );
-    $instance->default_value[0] = $default;
-    $instance->save();
-  }
-
-  // copy old field data to new fields
-  // thereby preserving the value field (on/off) of share_light_toggle
-  db_query("INSERT INTO {field_data_share_light} 
-    (entity_type, bundle, deleted, entity_id, revision_id, language, delta, share_light_toggle)
-    SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, share_light_toggle_value
-    FROM {field_data_share_light_toggle}");
-  db_query("INSERT INTO {field_revision_share_light} 
-    (entity_type, bundle, deleted, entity_id, revision_id, language, delta, share_light_toggle)
-    SELECT entity_type, bundle, deleted, entity_id, revision_id, language, delta, share_light_toggle_value
-    FROM {field_revision_share_light_toggle}");
-
-  $serialized_options = serialize($default['options']);
-  db_query("UPDATE {field_data_share_light} SET share_light_options=:options", array(':options' => $serialized_options));
-  db_query("UPDATE {field_revision_share_light} SET share_light_options=:options", array(':options' => $serialized_options));
-
-  if (db_table_exists('field_data_share_light_title')) {
-    foreach (db_query('SELECT entity_type, entity_id, share_light_title_value as title FROM {field_data_share_light_title}') as $row) {
-      $data = $default['options'];
-      $data['subject'] = $row->title;
-      $params = array(
-        ':type' => $row->entity_type,
-        ':id' => $row->entity_id,
-        ':options' => serialize($data),
-      );
-      db_query("UPDATE {field_data_share_light} SET share_light_options=:options WHERE entity_type=:type AND entity_id=:id", $params);
-      db_query("UPDATE {field_revision_share_light} SET share_light_options=:options WHERE entity_type=:type AND entity_id=:id", $params);
     }
-    // clean up the db
-    db_query("DELETE FROM {field_config} WHERE field_name='share_light_title'");
-    db_query("DELETE FROM {field_config_instance} WHERE field_name='share_light_title'");
-    db_drop_table('field_data_share_light_title');
-    db_drop_table('field_revision_share_light_title');
+    $rows = db_query("SELECT entity_type, entity_id, delta, share_light_options FROM {field_data_{$field['field_name']}}");
+    foreach ($rows as $row) {
+      $options = serialize(_share_light_update_8_options_map(unserialize($row->share_light_options)));
+      db_update('field_data_' . $field['field_name'])
+        ->fields(array('share_light_options' => $options))
+        ->condition('entity_type', $row->entity_type)
+        ->condition('entity_id', $row->entity_id)
+        ->condition('delta', $row->delta)
+        ->execute();
+    }
+    $rows = db_query("SELECT entity_type, entity_id, revision_id, delta, share_light_options FROM {field_revision_{$field['field_name']}}");
+    foreach ($rows as $row) {
+      $options = serialize(_share_light_update_8_options_map(unserialize($row->share_light_options)));
+      db_update('field_revision_' . $field['field_name'])
+        ->fields(array('share_light_options' => $options))
+        ->condition('entity_type', $row->entity_type)
+        ->condition('entity_id', $row->entity_id)
+        ->condition('revision_id', $row->revision_id)
+        ->condition('delta', $row->delta)
+        ->execute();
+    }
   }
+  // Since we use _field_write_instance() directly
+  // we need to clear the caches manually.
+  field_cache_clear();
+}
 
-  // clean up the db
-  db_query("DELETE FROM {field_config} WHERE field_name='share_light_toggle'");
-  db_query("DELETE FROM {field_config_instance} WHERE field_name='share_light_toggle'");
-  db_drop_table('field_data_share_light_toggle');
-  db_drop_table('field_revision_share_light_toggle');
-
-  // Delete block title overrides from block interface.
-  db_query("UPDATE {block} SET title='' WHERE module='share_light'");
+function _share_light_update_8_options_map($options) {
+  $options['link']['path'] = $options['share_url'];
+  unset($options['share_url']);
+  foreach(array('email', 'facebook', 'pinterest', 'twitter') as $channel) {
+    $options['channels'][$channel]['toggle'] = $options['advanced']["channel_{$channel}_toggle"];
+  }
+  $options['channels']['pinterest']['text'] = $options['advanced']['channel_pinterest_text'];
+  $options['channels']['twitter']['text'] = $options['advanced']['channel_twitter_text'];
+  unset($options['advanced']);
+  return $options;
 }

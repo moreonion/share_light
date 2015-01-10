@@ -3,6 +3,10 @@
 namespace Drupal\share_light;
 
 interface ChannelInterface {
+  public function __construct($block, $options);
   public static function title();
-  public function render($url, $options, $link);
+  public static function defaults();
+  public static function optionsWidget(array &$element, array $options);
+  public function enabled();
+  public function render();
 }

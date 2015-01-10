@@ -2,9 +2,10 @@
 
 namespace Drupal\share_light;
 
-class Email implements ChannelInterface {
+class Email extends ChannelBase {
   public static function title() { return t('Email'); }
-  public function render($url, $options, $link) {
+  public function render() {
+    $link = $this->block->getLink();
     $query['path'] = $link['path'];
     if (isset($link['query'])) {
       $query['query'] = $link['query'];
