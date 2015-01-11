@@ -1,5 +1,7 @@
 <?php
 
+use \Drupal\share_light\Email;
+
 /**
  * Get all default values as array.
  */
@@ -159,6 +161,27 @@ function share_light_recipient_list($form_state) {
 }
 
 /**
+ * Get share URL.
+ */
+function share_light_email_url($node) {
+  $query = array('s' => 'share_email');
+  $path = 'node/' . $node->nid;
+
+  if (!empty($_GET['hash'])) {
+    $get_query = drupal_get_query_parameters(NULL, array('q', 'hash'));
+    if ($_GET['hash'] == Email::signQuery($get_query)) {
+      if (!empty($get_query['path'])) {
+        $path = $get_query['path'];
+        unset($get_query['path']);
+      }
+      $query += $get_query;
+    }
+  }
+
+  return url($path, array('query' => $query, 'absolute' => TRUE));
+}
+
+/**
  * Validation callback function for share_light_node_email_form().
  */
 function share_light_node_email_form_validate($form, &$form_state) {
@@ -222,13 +245,11 @@ function share_light_node_email_form_submit($form, &$form_state) {
   $recipients = $recipient_list['recipients'];
   $tokens['share'] = $recipient_list['token'];
   $tokens['node'] = $node;
-  $pathOptions['absolute'] = TRUE;
-  $pathOptions['query']['s'] = 'share_email';
 
   // generate name from firstname and lastname, name used in different occasions in this file
   $values['sender'] = $tokens['share']['sender'];
   $values['footer'] = token_replace($defaults['share_light_email_message_footer'], $tokens);
-  $tokens['share']['url'] = $values['url'] = url('node/' . $node->nid, $pathOptions);
+  $tokens['share']['url'] = $values['url'] = share_light_email_url($node);
 
   $message = token_replace(theme('share_light_message_body', array(
     'node' => $node,

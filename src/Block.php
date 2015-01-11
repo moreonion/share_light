@@ -7,6 +7,7 @@ class Block {
     $default = array(
       'subject' => t('Share this page!'),
       'link' => array('path' => ''),
+      'node' => NULL,
       'counter_toggle' => variable_get('share_light_default_counter_toggle', 1),
       'channels' => array(),
       'image' => array('fid' => 0),
@@ -49,6 +50,10 @@ class Block {
 
   public function getLink() {
     return $this->options['link'];
+  }
+
+  public function getNode() {
+    return $this->options['node'];
   }
 
   public function getImageUrl() {
@@ -95,12 +100,13 @@ class Block {
     $node = NULL;
     if (!($node = menu_get_object())) {
       $count = 0;
-      $nid = preg_replace('/^.*\/(\d+)$/', '$1', $link, -1, $count);
+      $nid = preg_replace('/^.*\/(\d+)$/', '$1', current_path(), -1, $count);
       if ($count) {
         $node = node_load($nid);
       }
     }
     if ($node) {
+      $options['node'] = $node;
       if ($item = self::config_by_node($node, 'share_light')) {
         if ($item['toggle'] == '0') {
           return NULL;
