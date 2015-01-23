@@ -12,11 +12,17 @@ class Email extends ChannelBase {
       $query['query'] = $link['query'];
     }
     $parts = explode('/', $query['path']);
+    if (count($parts) == 2 && $parts[0] == 'node' && is_numeric($parts[1])) {
+      $p_node = node_load($parts[1]);
+      $node = $p_node;
+    }
     if ($node) {
       if ($query['path'] == 'node/' . $node->nid) {
         unset($query['path']);
       }
-      $query['hash'] = static::signQuery($query);
+      if ($query) {
+        $query['hash'] = static::signQuery($query);
+      }
       return array(
         'title' => 'E-Mail',
         'href' => 'node/' . $node->nid . '/share',
