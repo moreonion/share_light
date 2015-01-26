@@ -168,13 +168,20 @@ function share_light_email_url($node) {
   $path = 'node/' . $node->nid;
 
   if (!empty($_GET['hash'])) {
-    $get_query = drupal_get_query_parameters(NULL, array('q', 'hash'));
-    if ($_GET['hash'] == Email::signQuery($get_query)) {
-      if (!empty($get_query['path'])) {
-        $path = $get_query['path'];
-        unset($get_query['path']);
+    $get = array();
+    if (isset($_GET['path'])) {
+      $get['path'] = $_GET['path'];
+    }
+    if (isset($_GET['query'])) {
+      $get['query'] = $_GET['query'];
+    }
+    if ($_GET['hash'] == Email::signQuery($get)) {
+      if (!empty($get['path'])) {
+        $path = $get['path'];
       }
-      $query += $get_query;
+      if (!empty($get['query'])) {
+        $query += $get['query'];
+      }
     }
   }
 

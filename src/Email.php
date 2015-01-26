@@ -7,10 +7,10 @@ class Email extends ChannelBase {
   public function render() {
     $node = $this->block->getNode();
     $link = $this->block->getLink();
-    if (isset($link['query'])) {
-      $query = $link['query'];
-    }
     $query['path'] = $link['path'];
+    if (isset($link['query'])) {
+      $query['query'] = $link['query'];
+    }
     $parts = explode('/', $query['path']);
     if (count($parts) == 2 && $parts[0] == 'node' && is_numeric($parts[1])) {
       $p_node = node_load($parts[1]);
