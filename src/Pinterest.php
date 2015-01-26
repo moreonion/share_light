@@ -4,7 +4,7 @@ namespace Drupal\share_light;
 
 class Pinterest extends ChannelBase {
   public static function title() { return t('Pinterest'); }
-  public static function defaults() { return array('text' => ''); }
+  public static function defaults() { return array('text' => '') + parent::defaults(); }
   public static function optionsWidget(array &$element, array $options) {
     $title = static::title();
     $element['text'] =  array(
