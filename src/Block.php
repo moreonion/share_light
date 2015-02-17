@@ -9,7 +9,7 @@ class Block {
       'link' => array('path' => ''),
       'node' => NULL,
       'counter_toggle' => variable_get('share_light_default_counter_toggle', 1),
-      'channels' => array(),
+      'channels' => Loader::instance()->defaults(),
       'image' => array('fid' => 0),
     );
     return $default;
