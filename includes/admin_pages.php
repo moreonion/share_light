@@ -81,7 +81,7 @@ function share_light_node_email_settings($form, &$form_state, $node) {
 function share_light_node_email_settings_submit($form, &$form_state) {
   $data['nid'] = $form_state['node']->nid;
 
-  $keys = array('page_title', 'page_instructions', 'page_redirect', 'message_edit', 'message_subject', 'message_message');
+  $keys = array('page_title', 'page_instructions', 'page_redirect', 'message_edit', 'message_subject', 'message_message', 'message_footer');
   foreach ($keys as $key) {
     $data[$key] = $form_state['values'][$key];
   }
