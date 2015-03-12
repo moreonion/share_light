@@ -29,7 +29,9 @@ function share_light_field_info() {
 function share_light_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
   if ($field['type'] == 'share_light') {
     foreach ($items as &$item) {
-      $item['options'] = serialize($item['options']);
+      if (is_array($item['options'])) {
+        $item['options'] = serialize($item['options']);
+      }
     }
   }
 }
