@@ -103,7 +103,7 @@ function share_light_access($node) {
  */
 function share_light_tokens($type, $tokens, array $data = array(), array $options = array()) {
   $replacements = array();
-  if ($type = 'node' && isset($data['share'])) {
+  if ($type == 'share' && isset($data['share'])) {
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'recipients':
