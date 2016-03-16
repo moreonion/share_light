@@ -219,7 +219,7 @@ function share_light_node_email_form_validate($form, &$form_state) {
     form_set_error('subject', t('You must enter a subject.'));
   }
   if (!$form_state['values']['message']) {
-    form_set_error('subject', t('You must enter message.'));
+    form_set_error('message', t('You must enter a message.'));
   }
   if (empty($recipient_addresses)) {
     form_set_error('recipients', t('You did not enter any recipients.'));
