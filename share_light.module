@@ -99,6 +99,32 @@ function share_light_access($node) {
 }
 
 /**
+ * Implements hook_token_info().
+ */
+function share_light_token_info() {
+  $types['share'] = [
+    'name' => t('Share'),
+    'description' => t('Replacements for sharing.'),
+    'needs-data' => ['share'],
+  ];
+  $tokens['share'] = [
+    'receipients' => [
+      'name' => t('Receipients'),
+      'description' => t('The list of receipients for this share email.'),
+    ],
+    'sender' => [
+      'name' => t('Sender name'),
+      'description' => t('The name of the sender as entered into the share via email form.'),
+    ],
+    'url' => [
+      'name' => t('Share URL'),
+      'description' => t('The URL of the page that should be shared.'),
+    ],
+  ];
+  return ['types' => $types, 'tokens' => $tokens];
+}
+
+/**
  * Implements hook_tokens().
  */
 function share_light_tokens($type, $tokens, array $data = array(), array $options = array()) {
