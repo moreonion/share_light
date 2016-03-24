@@ -81,9 +81,14 @@ function share_light_node_email_settings($form, &$form_state, $node) {
 function share_light_node_email_settings_submit($form, &$form_state) {
   $data['nid'] = $form_state['node']->nid;
 
-  $keys = array('page_title', 'page_instructions', 'page_redirect', 'message_edit', 'message_subject', 'message_message', 'message_footer');
+  $keys = array('page_title', 'page_redirect', 'message_edit', 'message_subject');
   foreach ($keys as $key) {
     $data[$key] = $form_state['values'][$key];
+  }
+  $format_keys = array('page_instructions', 'message_message', 'message_footer');
+  foreach ($format_keys as $key) {
+    $data[$key] = $form_state['values'][$key]['value'];
+    $data[$key . '_format'] = $form_state['values'][$key]['format'];
   }
   db_merge('share_light_email_settings')
     ->key(array('nid' => $data['nid']))
@@ -109,12 +114,13 @@ function _share_light_email_settings_form($defaults, $prefix = '') {
     '#description' => t('Title to display above the Forward page form'),
   );
   $form['page'][$prefix . 'page_instructions'] = array(
-    '#type' => 'textarea',
+    '#type' => 'text_format',
+    '#format' => $defaults['share_light_email_page_instructions_format'],
     '#title' => t('Forward Instructions'),
     '#default_value' => $defaults['share_light_email_page_instructions'],
     '#cols' => 40,
     '#rows' => 10,
-    '#description' => t('This message will be displayed above the form.  The token [site:name] will be replaced with the site name.'),
+    '#description' => t('This message will be displayed above the form. The token [site:name] will be replaced with the site name.'),
   );
   $form['page'][$prefix . 'page_redirect'] = array(
     '#type' => 'textfield',
@@ -142,15 +148,17 @@ function _share_light_email_settings_form($defaults, $prefix = '') {
     '#description' => t('Email subject line. Replacement tokens, as found below, may be used'),
   );
   $form['message'][$prefix . 'message_message'] = array(
-    '#type' => 'textarea',
+    '#type' => 'text_format',
+    '#format' => $defaults['share_light_email_message_message_format'],
     '#title' => t('Message Body'),
     '#default_value' => $defaults['share_light_email_message_message'],
     '#cols' => 40,
     '#rows' => 10,
-    '#description' => t('Email message body. Replacement tokens, as found below, may be used. The sender will be able to add their own message after this.'),
+    '#description' => t('Email message body. Replacement tokens, as found below, may be used. Note: Only use a text-format that all users are allowed to use.'),
   );
   $form['message'][$prefix . 'message_footer'] = array(
-    '#type' => 'textarea',
+    '#type' => 'text_format',
+    '#format' => $defaults['share_light_email_message_footer_format'],
     '#title' => t('Footer'),
     '#default_value' => $defaults['share_light_email_message_footer'],
     '#cols' => 40,

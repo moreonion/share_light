@@ -10,11 +10,14 @@ function share_light_email_defaults() {
     'share_light_email_page_title' => variable_get('share_light_email_page_title', t('Forward this page to a friend')),
     'share_light_email_page_noindex' => variable_get('share_light_email_page_noindex', TRUE),
     'share_light_email_page_instructions' => variable_get('share_light_email_page_instructions', ''),
+    'share_light_email_page_instructions_format' => variable_get('share_light_email_page_instructions_format'),
     'share_light_email_page_redirect' => variable_get('share_light_email_page_redirect', ''),
     'share_light_email_message_edit' => variable_get('share_light_email_message_edit', FALSE),
     'share_light_email_message_subject' => variable_get('share_light_email_message_subject', t('[share:sender] has forwarded a page to you from [site:name]')),
     'share_light_email_message_message' => variable_get('share_light_email_message_message', t('[share:sender] thought you would like to see this page from the [site:name] web site.')),
+    'share_light_email_message_message_format' => variable_get('share_light_email_message_message_format'),
     'share_light_email_message_footer' => variable_get('share_light_email_message_footer', t('Visit our site on [share:url].')),
+    'share_light_email_message_footer_format' => variable_get('share_light_email_message_footer_format'),
     'share_light_email_flood_control' => variable_get('share_light_email_flood_control', 100),
     'share_light_email_flood_error' => variable_get('share_light_email_flood_error', t("You can't send more than !number messages per hour. Please try again later.")),
     'share_light_email_flood_clicks' => variable_get('share_light_email_flood_clicks', 3),
@@ -83,7 +86,7 @@ function share_light_node_email_form($form, &$form_state, $node, $defaults) {
   
   $form['instructions'] = array(
     '#type' => 'item',
-    '#markup' => check_plain(token_replace($defaults['share_light_email_page_instructions'])),
+    '#markup' => check_markup(token_replace($defaults['share_light_email_page_instructions']), $defaults['share_light_email_page_instructions_format']),
   );
   $form['firstname'] = array(
     '#type' => 'textfield',
@@ -122,7 +125,8 @@ function share_light_node_email_form($form, &$form_state, $node, $defaults) {
     '#disabled' => !$edit_message,
   );
   $form['message'] = array(
-    '#type' => 'textarea',
+    '#type' => 'text_format',
+    '#format' => $defaults['share_light_email_message_message_format'],
     '#title' => t('Message'),
     '#cols' => 50,
     '#rows' => 5,
@@ -256,8 +260,9 @@ function share_light_node_email_form_submit($form, &$form_state) {
 
   // generate name from firstname and lastname, name used in different occasions in this file
   $values['sender'] = $tokens['share']['sender'];
-  $values['footer'] = nl2br(token_replace($defaults['share_light_email_message_footer'], $tokens));
   $tokens['share']['url'] = $values['url'] = share_light_email_url($node);
+  $values['footer'] = check_markup(token_replace($defaults['share_light_email_message_footer'], $tokens), $defaults['share_light_email_message_footer_format']);
+  $values['message'] = check_markup(token_replace($values['message']['value'], $tokens), $values['message']['format']);
 
   $message = token_replace(theme('share_light_message_body', array(
     'node' => $node,

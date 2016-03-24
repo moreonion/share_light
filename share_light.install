@@ -16,11 +16,14 @@ function share_light_schema() {
       'nid' => $int,
       'page_title' => $short_text,
       'page_instructions' => $long_text,
+      'page_instructions_format' => $short_text,
       'page_redirect' => $short_text,
       'message_edit' => $int,
       'message_subject' => $short_text,
       'message_message' => $long_text,
+      'message_message_format' => $short_text,
       'message_footer' => $long_text,
+      'message_footer_format' => $short_text,
     ),
     'primary key' => array('nid'),
   );
@@ -87,6 +90,16 @@ function _share_light_default_channels() {
   }
   $channels['pinterest'] = 0;
   return $channels;
+}
+
+/**
+ * Add text_format columns to share_light_email_settings.
+ */
+function share_light_update_7101() {
+  $short_text = array('type' => 'varchar', 'not null' => FALSE, 'length' => 255);
+  foreach (array('page_instructions_format', 'message_message_format', 'message_footer_format') as $f) {
+    db_add_field('share_light_email_settings', $f, $short_text);
+  }
 }
 
 /**
