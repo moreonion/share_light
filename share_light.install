@@ -72,6 +72,21 @@ function share_light_uninstall() {
   variable_del('share_light_default_counter_toggle');
   variable_del('share_light_channels_enabled');
   variable_del('share_light_tracking_enabled');
+  $email_fields = array(
+    'page_title',
+    'page_instructions',
+    'page_instructions_format',
+    'page_redirect',
+    'message_edit',
+    'message_subject',
+    'message_message',
+    'message_message_format',
+    'message_footer',
+    'message_footer_format',
+  );
+  foreach ($email_fields as $f) {
+    variable_del('share_light_email_' . $f);
+  }
 }
 
 function share_light_update_last_removed() {
