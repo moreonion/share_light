@@ -64,6 +64,7 @@ function share_light_email_admin_form($form, &$form_state) {
     '#description' => t('This text appears if a user exceeds the flood control limit.  The value of the flood control limit setting will appear in place of !number in the message presented to users'),
   );
 
+  $form['#submit'][] = '_share_light_email_settings_to_storage';
   return system_settings_form($form);
 }
 
@@ -76,6 +77,16 @@ function share_light_node_email_settings($form, &$form_state, $node) {
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
   $form['#submit'][] = 'share_light_node_email_settings_submit';
   return $form;
+}
+
+function _share_light_email_settings_to_storage($form, &$form_state) {
+  $p = 'share_light_email_';
+  $data = &$form_state['values'];
+  $format_keys = array('page_instructions', 'message_message', 'message_footer');
+  foreach ($format_keys as $key) {
+    $data[$p . $key . '_format'] = $data[$p . $key]['format'];
+    $data[$p . $key] = $data[$p . $key]['value'];
+  }
 }
 
 function share_light_node_email_settings_submit($form, &$form_state) {
