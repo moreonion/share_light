@@ -256,7 +256,6 @@ function share_light_node_email_form_submit($form, &$form_state) {
   $recipients = $recipient_list['recipients'];
   $tokens['share'] = $recipient_list['token'];
   $tokens['node'] = $node;
-  $values['message'] = nl2br(check_plain($values['message']));
 
   // generate name from firstname and lastname, name used in different occasions in this file
   $values['sender'] = $tokens['share']['sender'];
