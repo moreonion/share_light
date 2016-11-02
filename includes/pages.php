@@ -295,7 +295,10 @@ function share_light_node_email_form_submit($form, &$form_state) {
 
   module_invoke_all('share_light_email_send', $node, $values);
 
-  if ($redirect = variable_get('share_light_page_redirect')) {
+  if ($redirect = $defaults['share_light_email_page_redirect']) {
+    $form_state['redirect'] = $redirect;
+  }
+  elseif ($redirect = variable_get('share_light_page_redirect')) {
     $form_state['redirect'] = $redirect;
   } else {
     $form_state['redirect'] = 'node/' . $node->nid;
