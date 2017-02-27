@@ -11,12 +11,7 @@ class Email extends ChannelBase {
     if (isset($link['query'])) {
       $query['query'] = $link['query'];
     }
-    $parts = explode('/', $query['path']);
-    if (count($parts) == 2 && $parts[0] == 'node' && is_numeric($parts[1])) {
-      $p_node = node_load($parts[1]);
-      $node = $p_node;
-    }
-    if ($node) {
+    if ($node = menu_get_object('node', 1, $query['path'])) {
       if ($query['path'] == 'node/' . $node->nid) {
         unset($query['path']);
       }
