@@ -66,7 +66,16 @@ function share_light_node_email_page($node) {
   }
 
   $defaults = share_light_email_settings($node);
-  drupal_set_title(token_replace($defaults['share_light_email_page_title'], array('node' => $node)));
+
+  // Set the page title.
+  $title = $defaults['share_light_email_page_title'];
+  $title = token_replace($title, ['node' => $node]);
+  drupal_set_title($title);
+  // Compatibility with html_title: Set the node title so html_title doesn't
+  // override our page title in html_title_preprocess_page(). This is passed on
+  // due to static caching of the node object.
+  $node->title = $title;
+
   $form = drupal_get_form('share_light_node_email_form', $node, $defaults);
   $form['#attributes']['class'][] = 'share-page';
   return $form;
