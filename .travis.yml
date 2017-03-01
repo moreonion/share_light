@@ -25,7 +25,7 @@ before_script:
   - upal=`pwd`/upal
   - mysql -e 'create database drupal'
   - php -d sendmail_path=`which true` ~/.composer/vendor/bin/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal test-root
-  - ln -s $repo test-root/drupal/sites/all/modules/campaignion
+  - ln -s $repo test-root/drupal/sites/all/modules/share_light
   - cd test-root/drupal
   - root=`pwd`
   - drush dl file_entity little_helpers media psr0
