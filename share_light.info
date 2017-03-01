@@ -5,4 +5,5 @@ core = 7.x
 
 dependencies[] = little_helpers
 dependencies[] = media
+dependencies[] = node
 dependencies[] = psr0
