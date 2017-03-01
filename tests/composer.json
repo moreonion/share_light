@@ -1,0 +1,14 @@
+{
+  "name": "moreonion/share_light",
+  "description": "Share light drupal module",
+  "homepage": "https://github.com/moreonion/share_light",
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "authors": [
+    { "name": "Roman Zimmermann", "email": "roman@more-onion.com" }
+  ],
+  "require": {
+    "php": ">=5.5.0"
+  }
+}

@@ -1,0 +1,36 @@
+language: php
+sudo: false
+
+php:
+  - 7.0
+
+mysql:
+  database: drupal
+  username: root
+  encoding: utf8
+
+cache:
+  directories:
+     - $HOME/.composer/cache
+     - $HOME/.drush/cache
+
+install:
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - composer global require drush/drush:6.* 'phpunit/phpunit=5.3.*'
+
+before_script:
+  - repo=`pwd`
+  - cd ..
+  - git clone https://github.com/torotil/upal.git
+  - upal=`pwd`/upal
+  - mysql -e 'create database drupal'
+  - php -d sendmail_path=`which true` ~/.composer/vendor/bin/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/drupal test-root
+  - ln -s $repo test-root/drupal/sites/all/modules/campaignion
+  - cd test-root/drupal
+  - root=`pwd`
+  - drush dl file_entity little_helpers media psr0
+  - drush --yes pm-enable share_light
+
+script:
+  - cd $repo
+  - UPAL_ROOT=$root UPAL_DB_URL=mysql://root:@127.0.0.1/drupal UPAL_WEB_URL=http://127.0.0.1 ~/.composer/vendor/bin/phpunit -c phpunit.xml --bootstrap $upal/bootstrap.php .
