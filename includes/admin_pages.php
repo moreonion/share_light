@@ -16,7 +16,7 @@ function share_light_settings_form() {
     '#default_value' => variable_get('share_light_tracking_enabled', '1'),
   );
 
-  $options = Loader::instance()->channelOptions();
+  $options = Loader::instance()->allChannelOptions();
   $form['share_light_channels_enabled'] = array(
     '#title' => t('Enable social media channels for sharing.'),
     '#type' => 'checkboxes',

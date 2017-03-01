@@ -37,8 +37,28 @@ class Loader {
   public function channelStatus($name) {
   }
 
+  /**
+   * Get an options-array for all available channels.
+   *
+   * @return string[]
+   *   An associative array linking channel names to channel titles.
+   */
+  public function allChannelOptions() {
+    $options = [];
+    foreach ($this->channels as $name => $class) {
+      $options[$name] = $class::title();
+    }
+    return $options;
+  }
+
+  /**
+   * Get an options-array for all enabled channels.
+   *
+   * @return string[]
+   *   An associative array linking channel names to channel titles.
+   */
   public function channelOptions() {
-    $options = array();
+    $options = [];
     foreach ($this->channels as $name => $class) {
       if ($this->channelStatus[$name]) {
         $options[$name] = $class::title();
