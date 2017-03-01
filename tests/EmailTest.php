@@ -66,6 +66,15 @@ class EmailWebTest extends DrupalWebTestCase {
     $this->assertEqual("node/{$node2->nid}/share", $render['href']);
     // The share path points to the share node. No need to pass the path.
     $this->assertEqual([], $render['query']);
+
+    // Change node even it the path points to some sub-folder.
+    $path = "node/{$node2->nid}/something/else";
+    $block = new Block(['node' => $node, 'link' => ['path' => $path]]);
+    $email = new Email($block);
+    $render = $email->render();
+    $this->assertEqual("node/{$node2->nid}/share", $render['href']);
+    // Path should be left untouched.
+    $this->assertEqual($path, $render['query']['path']);
   }
 
 }
