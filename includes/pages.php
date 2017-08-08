@@ -246,7 +246,7 @@ function share_light_node_email_form_validate($form, &$form_state) {
   }
   if (!user_access('override flood control')) {
     // Check if it looks like we are going to exceed the flood limit.
-    // It is important to ensure that the number of e-mails to be sent count against the threshold.
+    // It is important to ensure that the number of emails to be sent count against the threshold.
     if (!flood_is_allowed('share_light_email', variable_get('share_light_email_flood_control', 10) - count($recipient_addresses) + 1)) {
       form_set_error('recipients', check_plain(t(variable_get('share_light_email_flood_error', "You can't send more than !number messages per hour. Please try again later."), array('!number' => variable_get('share_light_email_flood_control', 10)))));
     }

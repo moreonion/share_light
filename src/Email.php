@@ -22,11 +22,11 @@ class Email extends ChannelBase {
         $query['hash'] = static::signQuery($query);
       }
       return array(
-        'title' => 'E-Mail',
+        'title' => 'Email',
         'href' => 'node/' . $node->nid . '/share',
         'query' => $query,
         'attributes' => array(
-          'title' => t('Share this via E-Mail!'),
+          'title' => t('Share this via email!'),
           'data-share' => 'email',
         ),
       );

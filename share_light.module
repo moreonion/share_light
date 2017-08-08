@@ -24,8 +24,8 @@ function share_light_menu() {
     'type'             => MENU_CALLBACK,
   );
   $items['node/%node/share-settings'] = array(
-    'title'            => 'E-Mail share',
-    'description'      => 'Configure settings for sharing this node via e-mail.',
+    'title'            => 'Email share',
+    'description'      => 'Configure settings for sharing this node via email.',
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('share_light_node_email_settings', 1),
     'access callback'  => array('share_light_access'),
@@ -47,7 +47,7 @@ function share_light_menu() {
   ) + $items['admin/config/content/share-light'];
   $items['admin/config/content/share-light/email'] = array(
     'description'      => 'Email settings.',
-    'title'            => 'Share via E-Mail',
+    'title'            => 'Share via email',
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('share_light_email_admin_form'),
     'access arguments' => array('admin share_light global'),
