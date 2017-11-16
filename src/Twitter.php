@@ -10,7 +10,7 @@ class Twitter extends ChannelBase {
     $element['text'] =  array(
       '#title' => t('Tweet text for ' . $title . '.'),
       '#description' => t('Tweet text for ' . $title . '.'),
-      '#maxlength' => 116, // = 140 - 1 - 23 (tweet max-length - space - url in https)
+      '#maxlength' => 256, // = 280 - 1 - 23 (tweet max-length - space - url in https)
       '#type' => 'textarea',
       '#cols' => 60,
       '#rows' => 2,
