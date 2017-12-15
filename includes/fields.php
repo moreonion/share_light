@@ -119,22 +119,6 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
     '#default_value' => $item['options']['link']['path'],
   );
 
-  $element['options']['image'] = array(
-    '#title' => t('Image to be shared.'),
-    '#description' => t('Image to be shared.'),
-    '#type' => 'media',
-    '#default_value' => $item['options']['image'],
-    '#access' => FALSE, // TODO
-  );
-
-  $element['options']['counter_toggle'] = array(
-    '#title' => t('Show counter (number of shares) along with share options'),
-    '#description' => t('Show counter (number of shares) along with share options'),
-    '#type' => 'checkbox',
-    '#default_value' => $item['options']['counter_toggle'],
-    '#access' => FALSE, // TODO
-);
-
   $element['options']['channels'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced share options'),
