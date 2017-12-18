@@ -8,9 +8,7 @@ class Block {
       'subject' => t('Share this page!'),
       'link' => array('path' => ''),
       'node' => NULL,
-      'counter_toggle' => variable_get('share_light_default_counter_toggle', 1),
       'channels' => Loader::instance()->defaults(),
-      'image' => array('fid' => 0),
     );
     return $default;
   }

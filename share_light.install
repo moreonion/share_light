@@ -69,7 +69,6 @@ function share_light_install() {
 
 function share_light_uninstall() {
   variable_del('share_light_default_toggle');
-  variable_del('share_light_default_counter_toggle');
   variable_del('share_light_channels_enabled');
   variable_del('share_light_tracking_enabled');
   $email_fields = array(
