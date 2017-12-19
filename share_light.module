@@ -108,9 +108,9 @@ function share_light_token_info() {
     'needs-data' => ['share'],
   ];
   $tokens['share'] = [
-    'receipients' => [
-      'name' => t('Receipients'),
-      'description' => t('The list of receipients for this share email.'),
+    'recipients' => [
+      'name' => t('Recipients'),
+      'description' => t('The list of recipients for this share email.'),
     ],
     'sender' => [
       'name' => t('Sender name'),
