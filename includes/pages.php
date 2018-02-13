@@ -99,14 +99,14 @@ function share_light_node_email_form($form, &$form_state, $node, $defaults) {
   );
   $form['firstname'] = array(
     '#type' => 'textfield',
-    '#title' => t('First name'),
+    '#title' => t('Your first name'),
     '#size' => 58,
     '#maxlength' => 254,
     '#required' => TRUE,
   );
   $form['lastname'] = array(
     '#type' => 'textfield',
-    '#title' => t('Last name'),
+    '#title' => t('Your last name'),
     '#size' => 58,
     '#maxlength' => 254,
     '#required' => TRUE,
