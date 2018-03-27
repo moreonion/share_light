@@ -33,4 +33,7 @@ before_script:
 
 script:
   - cd $repo
-  - UPAL_ROOT=$root UPAL_DB_URL=mysql://root:@127.0.0.1/drupal UPAL_WEB_URL=http://127.0.0.1 ~/.composer/vendor/bin/phpunit -c phpunit.xml --bootstrap $upal/bootstrap.php .
+  - UPAL_ROOT=$root UPAL_DB_URL=mysql://root:@127.0.0.1/drupal UPAL_WEB_URL=http://127.0.0.1 ~/.composer/vendor/bin/phpunit -c phpunit.xml.dist --coverage-clover=coverage.xml --bootstrap $upal/bootstrap.php .
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
