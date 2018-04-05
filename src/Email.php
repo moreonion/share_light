@@ -2,8 +2,24 @@
 
 namespace Drupal\share_light;
 
+/**
+ * A channel for sharing via e-mail.
+ */
 class Email extends ChannelBase {
-  public static function title() { return t('Email'); }
+
+  /**
+   * Returns the channel's name.
+   *
+   * @return string
+   *   Returns t('Email').
+   */
+  public static function title() {
+    return t('Email');
+  }
+
+  /**
+   * Renders the HTML element.
+   */
   public function render() {
     $node = $this->block->getNode();
     $link = $this->block->getLink();
@@ -32,6 +48,14 @@ class Email extends ChannelBase {
       );
     }
   }
+
+  /**
+   * Generates a base64 encoded HMAC.
+   *
+   * @return string
+   *   A base64 encoded HMAC with the salted filepath
+   *   as secret key.
+   */
   public static function signQuery($query) {
     $key = drupal_get_hash_salt() . __FILE__;
     return drupal_hmac_base64(serialize($query), $key);

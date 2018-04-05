@@ -5,8 +5,8 @@
  * Field related functions.
  */
 
-use \Drupal\share_light\Loader;
-use \Drupal\share_light\Block;
+use Drupal\share_light\Loader;
+use Drupal\share_light\Block;
 
 /**
  * Implements hook_field_info().
@@ -21,7 +21,6 @@ function share_light_field_info() {
   );
   return $info;
 }
-
 
 /**
  * Implements hook_field_presave().
@@ -131,8 +130,8 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
   foreach ($available_channels as $channel_name => $title) {
     $ctoggle_id = drupal_html_id('share-light-channel-' . $channel_name . '-toggle');
     $element['options']['channels']['toggle_' . $channel_name] = array(
-      '#title' => t('Show '.$title.' share button.'),
-      '#description' => t('Enable '.$title.' on this page.'),
+      '#title' => t('Show @title share button.', ['@title' => $title]),
+      '#description' => t('Enable @title on this page.', ['@title' => $title]),
       '#type' => 'checkbox',
       '#default_value' => $item['options']['channels'][$channel_name]['toggle'],
       '#attributes' => array('id' => $ctoggle_id),
@@ -155,6 +154,15 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
   return $element;
 }
 
+/**
+ * Updates the form state of the share_light block by transforming its options.
+ *
+ * Original structure `$values['channels']`:
+ * {"toggle_CHANNEL1": 1, "options_CHANNEL1": {"OPTION1": "VALUE1",...},...}`
+ *
+ * Transformed structure `$values['channels']`:
+ * {"CHANNEL1": {"toggle": True, "OPTION1": "VALUE1",...},...}`
+ */
 function _share_light_transform_options($element, &$form_state, $form) {
   $values = &drupal_array_get_nested_value($form_state['values'], $element['#parents']);
   $loader = Loader::instance();
@@ -171,7 +179,6 @@ function _share_light_transform_options($element, &$form_state, $form) {
   $values['options']['link']['path'] = $values['options']['share_url'];
   unset($values['options']['share_url']);
 }
-
 
 /**
  * Implements hook_field_formatter_info().

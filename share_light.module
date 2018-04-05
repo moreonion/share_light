@@ -2,12 +2,13 @@
 
 /**
  * @file
+ * Defines all functions that must be loaded on every request.
  *
  * Defines all hook implementations or other functions that
- * must be loaded in every request.
+ * must be loaded on every request.
  */
 
-use \Drupal\share_light\Loader;
+use Drupal\share_light\Loader;
 
 require_once dirname(__FILE__) . '/includes/block.php';
 require_once dirname(__FILE__) . '/includes/fields.php';
@@ -34,7 +35,7 @@ function share_light_menu() {
     'type'             => MENU_LOCAL_TASK,
   );
   $items['admin/config/content/share-light'] = array(
-    'title'            => t('Share light'),
+    'title'            => 'Share light',
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('share_light_settings_form'),
     'description'      => 'Share light settings.',
@@ -42,7 +43,7 @@ function share_light_menu() {
     'access arguments' => array('admin share_light global'),
   );
   $items['admin/config/content/share-light/block'] = array(
-    'title' => t('Block settings'),
+    'title' => 'Block settings',
     'type'  => MENU_DEFAULT_LOCAL_TASK,
   ) + $items['admin/config/content/share-light'];
   $items['admin/config/content/share-light/email'] = array(
@@ -70,7 +71,7 @@ function share_light_permission() {
       'title'       => t('Administer share_light settings for own content'),
       'description' => t('Administer share_light settings on content that the user created.'),
     ),
-   'admin share_light all pages' => array(
+    'admin share_light all pages' => array(
       'title'       => t('Administer share_light settings for all pages'),
       'description' => t('Administer share_light settings for all pages.'),
     ),
@@ -83,7 +84,7 @@ function share_light_permission() {
 }
 
 /**
- * access callback set in hook_menu().
+ * Access callback set in hook_menu().
  */
 function share_light_access($node) {
   global $user;
@@ -135,9 +136,11 @@ function share_light_tokens($type, $tokens, array $data = array(), array $option
         case 'recipients':
           $replacements[$original] = isset($data['share']['recipients']) ? filter_xss(implode($data['share']['recipients'], ', ')) : t('(Recipient list)');
           break;
+
         case 'sender':
           $replacements[$original] = isset($data['share']['sender']) ? filter_xss($data['share']['sender']) : t('(Your name)');
           break;
+
         case 'url':
           if (isset($data['share']['url'])) {
             $replacements[$original] = $data['share']['url'];
@@ -185,7 +188,11 @@ function share_light_variable_group_info() {
     'title' => t('Share light settings'),
     'description' => t('Site wide share_light settings.'),
     'access' => 'admin share_light global',
-    'path' => array('admin/config/content/share-light', 'admin/config/content/share-light/block', 'admin/config/content/share-light/email'),
+    'path' => [
+      'admin/config/content/share-light',
+      'admin/config/content/share-light/block',
+      'admin/config/content/share-light/email',
+    ],
   );
   return $groups;
 }
