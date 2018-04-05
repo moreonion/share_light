@@ -21,7 +21,7 @@ class Twitter extends ChannelBase {
    * Returns the default values for the channel's `optionsWidget`.
    */
   public static function defaults() {
-    return array('text' => '') + parent::defaults();
+    return array('text' => '[share:url]') + parent::defaults();
   }
 
   /**
@@ -46,19 +46,28 @@ class Twitter extends ChannelBase {
 
   /**
    * Returns a link field containing a link to `http://twitter.com/share`.
+   *
+   * @return array|null
+   *   The link field's renderable array or NULL if the generation of
+   *   token replacement data failed.
    */
   public function render() {
-    $url = $this->block->getUrl();
-    return array(
-      'title' => 'Twitter',
-      'href' => 'http://twitter.com/share',
-      'query' => array('text' => $this->options['text'], 'url' => $url),
-      'attributes' => array(
-        'title' => t('Share this via Twitter!'),
-        'data-share' => 'twitter',
-        'target' => '_blank',
-      ),
-    );
+    $data = $this->generateTokenData('twitter_share');
+
+    if ($data) {
+      $text = token_replace($this->options['text'], $data);
+
+      return array(
+        'title' => 'Twitter',
+        'href' => 'http://twitter.com/share',
+        'query' => ['text' => $text],
+        'attributes' => array(
+          'title' => t('Share this via Twitter!'),
+          'data-share' => 'twitter',
+          'target' => '_blank',
+        ),
+      );
+    }
   }
 
 }
