@@ -29,6 +29,7 @@ class Pinterest extends ChannelBase {
         'attributes' => array(
           'title' => t('Share this via Pinterest!'),
           'data-share' => 'pinterest',
+          'target' => '_blank',
         ),
       );
     }

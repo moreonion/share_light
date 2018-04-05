@@ -56,6 +56,7 @@ class Twitter extends ChannelBase {
       'attributes' => array(
         'title' => t('Share this via Twitter!'),
         'data-share' => 'twitter',
+        'target' => '_blank',
       ),
     );
   }

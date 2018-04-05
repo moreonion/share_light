@@ -141,11 +141,9 @@ class Block {
     }
 
     $links = $this->channelLinks();
-
     foreach ($links as &$x) {
       $x['title'] = "<span>{$x['title']}</span>";
       $x['html'] = TRUE;
-      $x['attributes']['target'] = '_blank';
     }
 
     $block['subject'] = $this->options['subject'];

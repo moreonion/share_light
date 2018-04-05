@@ -44,6 +44,7 @@ class Email extends ChannelBase {
         'attributes' => array(
           'title' => t('Share this via email!'),
           'data-share' => 'email',
+          'target' => '_blank',
         ),
       );
     }
