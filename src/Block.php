@@ -151,6 +151,7 @@ class Block {
       '#theme' => 'links',
       '#links' => $links,
       '#attributes' => array('class' => array('share-light')),
+      '#attached' => ['js' => [drupal_get_path('module', 'share_light') . '/hide_mobile_buttons.js']],
     );
 
     return $block;

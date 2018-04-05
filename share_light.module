@@ -285,5 +285,6 @@ function share_light_share_light_channel_info() {
   $channels['facebook'] = '\\Drupal\\share_light\\Facebook';
   $channels['twitter'] = '\\Drupal\\share_light\\Twitter';
   $channels['pinterest'] = '\\Drupal\\share_light\\Pinterest';
+  $channels['whatsapp'] = '\\Drupal\\share_light\\WhatsApp';
   return $channels;
 }
