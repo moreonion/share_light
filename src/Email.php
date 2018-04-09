@@ -70,32 +70,28 @@ class Email extends ChannelBase {
   /**
    * Returns a link field containing a `mailto:` URI.
    *
-   * @return array|null
-   *   The link field's renderable array or NULL if the generation
-   *   of token replacement data failed.
+   * @return array
+   *   The link field's renderable array.
    */
   private function renderLink() {
     $data = $this->generateTokenData('email_share');
+    $query['subject'] = htmlspecialchars_decode(
+      token_replace($this->options['mailto']['subject'], $data),
+      ENT_QUOTES);
+    $query['body'] = htmlspecialchars_decode(
+      token_replace($this->options['mailto']['body'], $data),
+      ENT_QUOTES);
 
-    if ($data) {
-      $query['subject'] = htmlspecialchars_decode(
-        token_replace($this->options['mailto']['subject'], $data),
-        ENT_QUOTES);
-      $query['body'] = htmlspecialchars_decode(
-        token_replace($this->options['mailto']['body'], $data),
-        ENT_QUOTES);
-
-      return [
-        'title' => 'Email',
-        'href' => 'mailto:',
-        'query' => $query,
-        'attributes' => [
-          'title' => t('Share this via Email!'),
-          'data-share' => 'email',
-        ],
-        'external' => TRUE,
-      ];
-    }
+    return [
+      'title' => 'Email',
+      'href' => 'mailto:',
+      'query' => $query,
+      'attributes' => [
+        'title' => t('Share this via Email!'),
+        'data-share' => 'email',
+      ],
+      'external' => TRUE,
+    ];
   }
 
   /**

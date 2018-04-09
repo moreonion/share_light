@@ -47,27 +47,23 @@ class Twitter extends ChannelBase {
   /**
    * Returns a link field containing a link to `http://twitter.com/share`.
    *
-   * @return array|null
-   *   The link field's renderable array or NULL if the generation of
-   *   token replacement data failed.
+   * @return array
+   *   The link field's renderable array.
    */
   public function render() {
     $data = $this->generateTokenData('twitter_share');
+    $text = token_replace($this->options['text'], $data);
 
-    if ($data) {
-      $text = token_replace($this->options['text'], $data);
-
-      return array(
-        'title' => 'Twitter',
-        'href' => 'http://twitter.com/share',
-        'query' => ['text' => $text],
-        'attributes' => array(
-          'title' => t('Share this via Twitter!'),
-          'data-share' => 'twitter',
-          'target' => '_blank',
-        ),
-      );
-    }
+    return array(
+      'title' => 'Twitter',
+      'href' => 'http://twitter.com/share',
+      'query' => ['text' => $text],
+      'attributes' => array(
+        'title' => t('Share this via Twitter!'),
+        'data-share' => 'twitter',
+        'target' => '_blank',
+      ),
+    );
   }
 
 }

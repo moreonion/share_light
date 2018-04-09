@@ -84,16 +84,17 @@ abstract class ChannelBase implements ChannelInterface {
    *   The `node` object containing the `node`'s `nid`. If `NULL` is
    *   provided, the node will be fetched via `getNodeAndQuery()`.
    *
-   * @return string|null
-   *   The generated URL or NULL if no node could be fetched.
+   * @return string
+   *   The generated URL or the value of the block's `getUrl` if no node
+   *   could be fetched.
    */
   protected function generateShareUrl($utm_source, $node = NULL) {
     if (!$node) {
       $node = $this->getNodeAndQuery()['node'];
     }
 
+    $url = $this->block->getUrl();
     if ($node) {
-      $url = $this->block->getUrl();
       $url .= strpos($url, '?') ? '&' : '?';
       $url .=
         'utm_source=' . $utm_source . '&utm_campaign=[' .
@@ -101,6 +102,8 @@ abstract class ChannelBase implements ChannelInterface {
 
       return $url;
     }
+
+    return $url;
   }
 
   /**
@@ -110,19 +113,16 @@ abstract class ChannelBase implements ChannelInterface {
    *   The `utm_source` query parameter's value for `[share:url]`
    *   (e.g. `twitter_share`).
    *
-   * @return array|null
+   * @return array
    *   The token replacement data, contaning the corresponding `node`
-   *   and `share` data.
-   *   Or NULL if no node could be fetched.
+   *   and `share` data. The `node` can be `NULL`.
    */
   protected function generateTokenData($utm_source) {
     $nq = $this->getNodeAndQuery();
     $node = $nq['node'];
     $url = $this->generateShareUrl($utm_source, $node);
 
-    if ($url) {
-      return ['node' => $node, 'share' => ['url' => $url]];
-    }
+    return ['node' => $node, 'share' => ['url' => $url]];
   }
 
 }

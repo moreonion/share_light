@@ -45,30 +45,26 @@ class WhatsApp extends ChannelBase {
   /**
    * Returns a link field containing a `whatsapp://send` URL.
    *
-   * @return array|null
-   *   The link field's renderable array or NULL if the generation
-   *   of token replacement data failed.
+   * @return array
+   *   The link field's renderable array.
    */
   public function render() {
     $data = $this->generateTokenData('whatsapp_share');
+    $text = token_replace($this->options['text'], $data);
 
-    if ($data) {
-      $text = token_replace($this->options['text'], $data);
-
-      return [
-        'title' => 'WhatsApp',
-        'href' => 'whatsapp://send',
-        'query' => [
-          'text' => $text,
-        ],
-        'attributes' => [
-          'title' => t('Share this via WhatsApp!'),
-          'data-share' => 'whatsapp',
-          'class' => ['mobile'],
-        ],
-        'external' => TRUE,
-      ];
-    }
+    return [
+      'title' => 'WhatsApp',
+      'href' => 'whatsapp://send',
+      'query' => [
+        'text' => $text,
+      ],
+      'attributes' => [
+        'title' => t('Share this via WhatsApp!'),
+        'data-share' => 'whatsapp',
+        'class' => ['mobile'],
+      ],
+      'external' => TRUE,
+    ];
   }
 
 }

@@ -20,28 +20,25 @@ class FacebookMessenger extends ChannelBase {
   /**
    * Returns a link field contaiing a `fb-messenger:` URI.
    *
-   * @return array|null
-   *   The link field's renderable array or NULL if generation
-   *   of the URL to share failed.
+   * @return array
+   *   The link field's renderable array.
    */
   public function render() {
     $url = $this->generateShareUrl('fbmsg_share');
 
-    if ($url) {
-      return [
-        'title' => 'Facebook Messenger',
-        'href' => 'fb-messenger://share',
-        'query' => [
-          'link' => $url,
-        ],
-        'attributes' => [
-          'title' => t('Share this via Facebook Messenger!'),
-          'data-share' => 'facebook-messenger',
-          'class' => ['mobile'],
-        ],
-        'external' => TRUE,
-      ];
-    }
+    return [
+      'title' => 'Facebook Messenger',
+      'href' => 'fb-messenger://share',
+      'query' => [
+        'link' => $url,
+      ],
+      'attributes' => [
+        'title' => t('Share this via Facebook Messenger!'),
+        'data-share' => 'facebook-messenger',
+        'class' => ['mobile'],
+      ],
+      'external' => TRUE,
+    ];
   }
 
 }
