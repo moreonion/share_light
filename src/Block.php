@@ -8,7 +8,7 @@ namespace Drupal\share_light;
 class Block {
 
   /**
-   * Sets the block's defaults.
+   * Provides the block's defaults.
    *
    * @return array
    *   An array containing the block's default values for `subject`,
@@ -71,7 +71,7 @@ class Block {
   }
 
   /**
-   * Returns the absolute URL pointing to the node that shall be shared.
+   * Returns the absolute URL of the link that shall be shared.
    */
   public function getUrl($absolute = TRUE) {
     $link = $this->options['link'];
@@ -79,10 +79,10 @@ class Block {
   }
 
   /**
-   * Returns the relative URL pointing to the node that shall be shared.
+   * Returns the relative URL of the link that shall be shared.
    *
    * @return array
-   *   `path`: String of format 'node/[node:nid]'
+   *   `path`: An internal path or external URL.
    */
   public function getLink() {
     return $this->options['link'];
@@ -119,11 +119,7 @@ class Block {
    * If google analytics tracking is enabled, the corresponding JavaScript files
    * are added.
    *
-   * @return array
-   *   An array with
-   *   `#theme`: set to `links` and
-   *   `#links`: set to `channelLinks()` output, with each link wrapped in a
-   *             '<span>' tag.
+   * @see hook_block_view()
    */
   public function render() {
     drupal_alter('share_light_options', $this->options);
@@ -158,9 +154,16 @@ class Block {
   }
 
   /**
-   * Populate the `$options` array with the current node's data.
+   * Creates a new Block instance based on the node inferred from current path.
+   *
+   * @param array $options
+   *   Additional options for the block.
+   *
+   * @return Block|null
+   *   Returns a new Block if the `share light` block is activated
+   *   on the node's `share light` configuration, `NULL` otherwise.
    */
-  public static function fromCurrentPath($options = array()) {
+  public static function fromCurrentPath(array $options = array()) {
     $node = NULL;
     if (!($node = menu_get_object())) {
       $count = 0;

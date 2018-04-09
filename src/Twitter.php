@@ -25,7 +25,7 @@ class Twitter extends ChannelBase {
   }
 
   /**
-   * Adds a widget containing the options of the `Twitter` channel.
+   * Adds configuration options for the `Twitter` channel to the field widget.
    *
    * Allows the user to enter a default Tweet text.
    */

@@ -155,7 +155,9 @@ function share_light_field_widget_form(&$form, &$form_state, $field, $instance, 
 }
 
 /**
- * Updates the form state of the share_light block by transforming its options.
+ * Validator for `share_light_field_widget_form`.
+ *
+ * Updates the form state by transforming its options.
  *
  * Original structure `$values['channels']`:
  * {"toggle_CHANNEL1": 1, "options_CHANNEL1": {"OPTION1": "VALUE1",...},...}`

@@ -30,9 +30,7 @@ abstract class ChannelBase implements ChannelInterface {
   }
 
   /**
-   * Adds a widget containing the options for the Channel.
-   *
-   * Has to be implemented by the inheriting class.
+   * Generate form for editing the channel specific settings.
    *
    * @return array
    *   An empty array.

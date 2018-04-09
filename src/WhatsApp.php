@@ -25,7 +25,7 @@ class WhatsApp extends ChannelBase {
   }
 
   /**
-   * Adds a widget containing the options of the `WhatsApp` channel.
+   * Adds configuration options for the `WhatsApp` channel to the field widget.
    *
    * Allows the user to set a default message text.
    */

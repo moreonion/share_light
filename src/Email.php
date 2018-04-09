@@ -111,7 +111,7 @@ class Email extends ChannelBase {
   }
 
   /**
-   * Adds a widget containing the options of the `Email` channel.
+   * Adds configuration options for the `Email` channel to the field widget.
    *
    * Allows the user to choose between sharing via an online form
    * or the local Email client via a `mailto:` URI.
