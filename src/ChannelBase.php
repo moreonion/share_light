@@ -114,7 +114,7 @@ abstract class ChannelBase implements ChannelInterface {
    *   (e.g. `twitter_share`).
    *
    * @return array
-   *   The token replacement data, contaning the corresponding `node`
+   *   The token replacement data, containing the corresponding `node`
    *   and `share` data. The `node` can be `NULL`.
    */
   protected function generateTokenData($utm_source) {

@@ -2,18 +2,20 @@
 
 /**
  * @file
- *
  * Tests for the share-light module.
  */
 
-use \Drupal\share_light\Block;
-use \Drupal\share_light\Email;
+use Drupal\share_light\Block;
+use Drupal\share_light\Email;
 
 /**
  * Test the email channel.
  */
 class EmailWebTest extends DrupalWebTestCase {
 
+  /**
+   * Provides information on the `EmailWebTest` testcase to `SimpleTest`.
+   */
   public static function getInfo() {
     return [
       'name' => 'Email channel',
@@ -22,9 +24,12 @@ class EmailWebTest extends DrupalWebTestCase {
     ];
   }
 
+  /**
+   * Sets up content types for the tests if not available.
+   */
   public function setUp() {
     parent::setUp(['share_light', 'node']);
-    // Create Basic page and Article node types.
+
     if ($this->profile != 'standard') {
       $this->drupalCreateContentType(array('type' => 'page', 'name' => 'Basic page'));
       $this->drupalCreateContentType(array('type' => 'article', 'name' => 'Article'));
