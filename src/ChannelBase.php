@@ -47,35 +47,6 @@ abstract class ChannelBase implements ChannelInterface {
   }
 
   /**
-   * Fetches the node object and query parameters we want to share.
-   *
-   * In case of `campaigninon_thankyou_page`s, the parent node
-   * will be loaded (e.g. the corresponding petition).
-   *
-   * @return array
-   *   An array containing the node object and the URL query.
-   */
-  protected function getNodeAndQuery() {
-    $node = $this->block->getNode();
-    $link = $this->block->getLink();
-    $query['path'] = $link['path'];
-    if (isset($link['query'])) {
-      $query['query'] = $link['query'];
-    }
-    if ($p_node = menu_get_object('node', 1, $query['path'])) {
-      $node = $p_node;
-    }
-    if ($node && $query['path'] == 'node/' . $node->nid) {
-      unset($query['path']);
-    }
-
-    return array(
-      'node' => $node,
-      'query' => $query,
-    );
-  }
-
-  /**
    * Generates the URL to be shared.
    *
    * @param string $utm_source
@@ -90,7 +61,7 @@ abstract class ChannelBase implements ChannelInterface {
    */
   protected function generateShareUrl($utm_source, $node = NULL) {
     if (!$node) {
-      $node = $this->getNodeAndQuery()['node'];
+      $node = $this->block->getShareNode();
     }
 
     $url = $this->block->getUrl();
@@ -118,8 +89,7 @@ abstract class ChannelBase implements ChannelInterface {
    *   and `share` data. The `node` can be `NULL`.
    */
   protected function generateTokenData($utm_source) {
-    $nq = $this->getNodeAndQuery();
-    $node = $nq['node'];
+    $node = $this->block->getShareNode();
     $url = $this->generateShareUrl($utm_source, $node);
 
     return ['node' => $node, 'share' => ['url' => $url]];

@@ -46,9 +46,16 @@ class Email extends ChannelBase {
    * Renders an HTML email form..
    */
   private function renderForm() {
-    $nq = $this->getNodeAndQuery();
-    $node = $nq['node'];
-    $query = $nq['query'];
+    $node = $this->block->getShareNode();
+    $link = $this->block->getLink();
+
+    $query['path'] = $link['path'];
+    if (isset($link['query'])) {
+      $query['query'] = $link['query'];
+    }
+    if ($node && $query['path'] == 'node/' . $node->nid) {
+      unset($query['path']);
+    }
 
     if ($node) {
       if ($query) {

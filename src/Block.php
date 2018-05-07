@@ -41,10 +41,14 @@ class Block {
       unset($options['subject']);
     }
     $this->options = drupal_array_merge_deep(static::defaults(), $options);
+    drupal_alter('share_light_options', $this->options);
 
     // Overrides based on the current page / share $_GET-parameter.
     if (empty($this->options['link']['path'])) {
       $this->options['link']['path'] = !empty($_GET['share']) ? $_GET['share'] : current_path();
+    }
+    if (!($this->options['share_node'] = menu_get_object('node', 1, $this->options['link']['path']))) {
+      $this->options['share_node'] = $this->options['node'];
     }
   }
 
@@ -90,9 +94,20 @@ class Block {
 
   /**
    * Returns the containing node's object.
+   *
+   * This is the node containing the `share_light` block.
    */
   public function getNode() {
     return $this->options['node'];
+  }
+
+  /**
+   * Returns the node object of the node that shall be shared.
+   *
+   * This is the node that is used for e.g. generating the share URL.
+   */
+  public function getShareNode() {
+    return $this->options['share_node'];
   }
 
   /**
@@ -122,8 +137,6 @@ class Block {
    * @see hook_block_view()
    */
   public function render() {
-    drupal_alter('share_light_options', $this->options);
-
     // Add tracking for GA if googleanalytics module is enabled
     // and share tracking is enabled (default: enabled)
     $tracking_enabled = module_exists('googleanalytics') && variable_get('share_light_tracking_enabled', 1);
