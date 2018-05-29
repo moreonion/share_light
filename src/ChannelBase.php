@@ -64,17 +64,16 @@ abstract class ChannelBase implements ChannelInterface {
       $node = $this->block->getShareNode();
     }
 
-    $url = $this->block->getUrl();
     if ($node) {
-      $url .= strpos($url, '?') ? '&' : '?';
-      $url .=
-        'utm_source=' . $utm_source . '&utm_campaign=[' .
-        $node->nid . ']&utm_medium=share';
-
-      return $url;
+      $link = $this->block->getLink();
+      $link['query']['utm_source'] = $utm_source;
+      $link['query']['utm_campaign'] = "[{$node->nid}]";
+      $link['query']['utm_medium'] = 'share';
+      $link['absolute'] = TRUE;
+      return url($link['path'], $link);
     }
 
-    return $url;
+    return $this->block->getUrl();
   }
 
   /**
