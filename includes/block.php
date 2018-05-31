@@ -5,7 +5,7 @@
  * Block related functions.
  */
 
-use \Drupal\share_light\Block;
+use Drupal\share_light\Block;
 
 /**
  * Implements hook_block_info().
@@ -24,7 +24,7 @@ function share_light_block_info() {
  * Implements hook_block_view().
  */
 function share_light_block_view($id) {
-  if ($block = Block::from_current_path()) {
+  if ($block = Block::fromCurrentPath()) {
     return $block->render();
   }
 }

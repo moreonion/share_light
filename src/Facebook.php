@@ -13,6 +13,7 @@ class Facebook extends ChannelBase {
       'attributes' => array(
         'title' => t('Share this via Facebook!'),
         'data-share' => 'facebook',
+        'target' => '_blank',
       ),
     );
   }
