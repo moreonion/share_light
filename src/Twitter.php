@@ -57,7 +57,7 @@ class Twitter extends ChannelBase {
     return array(
       'title' => 'Twitter',
       'href' => 'http://twitter.com/share',
-      'query' => ['text' => $text],
+      'query' => ['text' => $text, 'url' => $this->block->getUrl()],
       'attributes' => array(
         'title' => t('Share this via Twitter!'),
         'data-share' => 'twitter',
