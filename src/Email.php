@@ -128,7 +128,6 @@ class Email extends ChannelBase {
       '#description' => t("Enables the user to send an email via the users' local email client instead of a webform"),
       '#attributes' => ['id' => $ctoggle_id],
       '#default_value' => $options['mailto_toggle'],
-      '#value_callback' => 'email_mailto_checkbox_value',
     ];
     $element['mailto'] = [
       '#type' => 'container',
