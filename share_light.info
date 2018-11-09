@@ -2,6 +2,7 @@ name = "Share light"
 description = "Defines a block with various share links - javascript free and stylable"
 package = "more onion"
 core = 7.x
+php = 5.4
 
 dependencies[] = little_helpers
 dependencies[] = media
