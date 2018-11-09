@@ -16,16 +16,81 @@ function share_light_settings_form() {
     '#default_value' => variable_get('share_light_tracking_enabled', '1'),
   );
 
-  $options = Loader::instance()->allChannelOptions();
+  $loader = Loader::instance();
+  $enabled_channels = $loader->channelsEnabled();
+  $weights = [];
+  $weight = 0;
+  foreach ($enabled_channels as $channel_id => $enabled) {
+    $weights[$channel_id] = [
+      '#type' => 'weight',
+      '#weight' => $weight,
+      '#default_value' => $weight++,
+      '#delta' => count($enabled_channels),
+    ];
+  }
   $form['share_light_channels_enabled'] = array(
+    '#tree' => TRUE,
     '#title' => t('Enable social media channels for sharing.'),
-    '#type' => 'checkboxes',
-    '#options' => $options,
-    '#description' => t('The social media channels available for sharing.'),
-    '#default_value' => variable_get('share_light_channels_enabled', array_keys($options)),
+    '#theme' => 'share_light_channel_table',
+    'enabled' => [
+      '#type' => 'checkboxes',
+      '#options' => $loader->allChannelOptions(),
+      '#default_value' => $enabled_channels,
+    ],
+    'weight' => $weights,
+    '#element_validate' => ['share_light_settings_channels_validate'],
   );
 
   return system_settings_form($form);
+}
+
+/**
+ * Element validate callback for the channel selection table.
+ *
+ * @see share_light_settings_form().
+ */
+function share_light_settings_channels_validate($element, &$form_state) {
+  $values = &drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  asort($values['weight']);
+  $enabled_channels = [];
+  foreach (array_keys($values['weight']) as $channel_id) {
+    $enabled_channels[$channel_id] = $values['enabled'][$channel_id];
+  }
+  $values = $enabled_channels;
+}
+
+/**
+ * Returns HTML for the channel selection and ordering.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: The checkboxes element to be themed.
+ */
+function theme_share_light_channel_table($variables) {
+  $element = $variables['element'];
+  $rows = [];
+  $header = [t('Channel'), t('Weight')];
+  // Generate a table row for each selectable item in #options.
+  foreach (element_children($element['weight']) as $channel_id) {
+    $row = ['class' => ['draggable']];
+    $weight = $element['weight'][$channel_id];
+    $weight['#attributes']['class'][] = 'weight';
+    $checkbox = $element['enabled'][$channel_id];
+    $row['data'] = [
+      'enabled' => drupal_render($checkbox),
+      'weight' => drupal_render($weight),
+    ];
+    $rows[$channel_id] = $row;
+  }
+  $table = [
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#caption' => $element['#title'],
+    '#attributes' => ['id' => drupal_html_id('share_light_channels_table')],
+  ];
+  drupal_add_tabledrag($table['#attributes']['id'], 'order', 'sibling', 'weight');
+  return drupal_render($table);
 }
 
 /**
