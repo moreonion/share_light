@@ -18,7 +18,8 @@ class Loader {
   public function __construct() {
     $this->channels = module_invoke_all('share_light_channel_info');
     $all_enabled = array_fill_keys(array_keys($this->channels), 1);
-    $this->channelStatus = variable_get('share_light_channels_enabled', $all_enabled) + $all_enabled;
+    $this->channelStatus = variable_get('share_light_channels_enabled', []) + $all_enabled;
+    $this->channelStatus = array_intersect_key($this->channelStatus, $this->channels);
   }
 
   public function allChannels() {
@@ -34,7 +35,15 @@ class Loader {
     return new $class($block, $options);
   }
 
-  public function channelStatus($name) {
+  /**
+   * Get an array of channels sorted as in the admin interface.
+   *
+   * @return array
+   *   An associative array keyed by channel IDs. The value is not empty if the
+   *   channel is enabled.
+   */
+  public function channelsEnabled() {
+    return $this->channelStatus;
   }
 
   /**

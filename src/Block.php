@@ -63,7 +63,7 @@ class Block {
     $links = array();
     $options = $this->options['channels'];
     $loader = Loader::instance();
-    $enabled_channels = array_keys($loader->channelOptions());
+    $enabled_channels = array_keys(array_filter($loader->channelsEnabled()));
     foreach ($enabled_channels as $channel_name) {
       $channel_options = isset($options[$channel_name]) ? $options[$channel_name] : array();
       $channel = $loader->channel($channel_name, $this, $channel_options);

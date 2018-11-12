@@ -160,6 +160,10 @@ function share_light_theme() {
     'variables' => array('node' => NULL, 'values' => array()),
     'template' => 'share-message-body',
   );
+  $info['share_light_channel_table'] = [
+    'file' => 'includes/admin_pages.php',
+    'render element' => 'element',
+  ];
   return $info;
 }
 
