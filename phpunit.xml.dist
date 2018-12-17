@@ -21,7 +21,13 @@
     <directory suffix=".install">.</directory>
     <exclude>
       <directory suffix="Test.php">.</directory>
+      <directory suffix=".api.php">.</directory>
       <directory suffix=".tpl.php">.</directory>
+      <directory suffix=".features.inc">.</directory>
+      <directory suffix=".features.field_base.inc">.</directory>
+      <directory suffix=".features.field_instance.inc">.</directory>
+      <directory suffix=".features.taxonomy.inc">.</directory>
+      <directory suffix=".features.uuid_term.inc">.</directory>
     </exclude>
   </whitelist>
 </filter>
