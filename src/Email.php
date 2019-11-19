@@ -62,7 +62,7 @@ class Email extends ChannelBase {
         $query['hash'] = static::signQuery($query);
       }
       return array(
-        'title' => 'Email',
+        'title' => $this->title(),
         'href' => 'node/' . $node->nid . '/share',
         'query' => $query,
         'attributes' => array(
@@ -90,7 +90,7 @@ class Email extends ChannelBase {
       ENT_QUOTES);
 
     return [
-      'title' => 'Email',
+      'title' => $this->title(),
       'href' => 'mailto:',
       'query' => $query,
       'attributes' => [

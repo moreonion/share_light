@@ -23,7 +23,7 @@ class Pinterest extends ChannelBase {
     if ($media_url = $this->block->getImageUrl()) {
     // get the url from the media object
       return array(
-        'title' => 'Pinterest',
+        'title' => $this->title(),
         'href' => 'http://www.pinterest.com/pin/create/button/',
         'query' => array('url' => $url, 'media' => $media_url, 'description' => $this->options['text']),
         'attributes' => array(

@@ -7,7 +7,7 @@ class Facebook extends ChannelBase {
   public function render() {
     $url = $this->block->getUrl();
     return array(
-      'title' => 'Facebook',
+      'title' => $this->title(),
       'href' => 'https://www.facebook.com/sharer.php',
       'query' => array('u' => $url),
       'attributes' => array(

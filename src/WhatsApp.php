@@ -53,7 +53,7 @@ class WhatsApp extends ChannelBase {
     $text = token_replace($this->options['text'], $data);
 
     return [
-      'title' => 'WhatsApp',
+      'title' => $this->title(),
       'href' => 'whatsapp://send',
       'query' => [
         'text' => $text,
