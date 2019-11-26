@@ -55,7 +55,7 @@ class Twitter extends ChannelBase {
     $text = token_replace($this->options['text'], $data);
 
     return array(
-      'title' => 'Twitter',
+      'title' => $this->title(),
       'href' => 'http://twitter.com/share',
       'query' => ['text' => $text, 'url' => $this->block->getUrl()],
       'attributes' => array(
