@@ -27,7 +27,7 @@ class Facebook extends ChannelBase {
     return [
       'title' => $this->title(),
       'href' => 'https://www.facebook.com/sharer.php',
-      'query' => ['u' => $this->block->getUrl()],
+      'query' => ['u' => $this->generateShareUrl('fb_share')],
       'attributes' => [
         'title' => t('Share this via Facebook!'),
         'data-share' => 'facebook',

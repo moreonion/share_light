@@ -28,7 +28,7 @@ class FacebookMessenger extends ChannelBase {
       'title' => $this->title(),
       'href' => 'fb-messenger://share',
       'query' => [
-        'link' => $this->block->getUrl(),
+        'link' => $this->generateShareUrl('fb_messenger_share'),
       ],
       'attributes' => [
         'title' => t('Share this via Facebook Messenger!'),

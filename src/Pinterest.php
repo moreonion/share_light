@@ -55,7 +55,7 @@ class Pinterest extends ChannelBase {
         'title' => $this->title(),
         'href' => 'http://www.pinterest.com/pin/create/button/',
         'query' => [
-          'url' => $this->block->getUrl(),
+          'url' => $this->generateShareUrl('pinterest_share'),
           'media' => $media_url,
           'description' => $this->options['text'],
         ],
