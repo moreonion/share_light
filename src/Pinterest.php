@@ -2,36 +2,70 @@
 
 namespace Drupal\share_light;
 
+/**
+ * Channel plugin for sharing on pinterest.
+ */
 class Pinterest extends ChannelBase {
-  public static function title() { return t('Pinterest'); }
-  public static function defaults() { return array('text' => '') + parent::defaults(); }
+
+  /**
+   * Returns the channel's name.
+   *
+   * @return string
+   *   Returns t('Pinterest').
+   */
+  public static function title() {
+    return t('Pinterest');
+  }
+
+  /**
+   * Returns the default values for the channel configuration.
+   */
+  public static function defaults() {
+    return ['text' => ''] + parent::defaults();
+  }
+
+  /**
+   * Generate configuration form elements for this channel.
+   */
   public static function optionsWidget(array &$element, array $options) {
-    $title = static::title();
-    $element['text'] =  array(
-      '#title' => t('Description text for ' . $title . '.'),
-      '#description' => t('Description text for ' . $title . '.'),
-      '#maxlength' => 500, // the pinterest max-length for descriptions
+    $vars = ['@title' => static::title()];
+    $element['text'] = [
+      '#title' => t('Description text for @title.', $vars),
+      '#description' => t('Description text for @title.', $vars),
+      // Pinterest’s max-length for descriptions is 500.
+      '#maxlength' => 500,
       '#type' => 'textarea',
       '#cols' => 60,
       '#rows' => 2,
-      '#attributes' => array(),
+      '#attributes' => [],
       '#default_value' => $options['text'],
-    );
+    ];
   }
+
+  /**
+   * Returns data for a link element for sharing on facebook.
+   *
+   * @return array
+   *   Options-array for a link renderable.
+   */
   public function render() {
-    $url = $this->block->getUrl();
+    // Get the url from the media object.
     if ($media_url = $this->block->getImageUrl()) {
-    // get the url from the media object
-      return array(
+      return [
         'title' => $this->title(),
         'href' => 'http://www.pinterest.com/pin/create/button/',
-        'query' => array('url' => $url, 'media' => $media_url, 'description' => $this->options['text']),
-        'attributes' => array(
+        'query' => [
+          'url' => $this->generateShareUrl('pinterest_share'),
+          'media' => $media_url,
+          'description' => $this->options['text'],
+        ],
+        'attributes' => [
           'title' => t('Share this via Pinterest!'),
           'data-share' => 'pinterest',
           'target' => '_blank',
-        ),
-      );
+        ],
+      ];
     }
   }
+
 }

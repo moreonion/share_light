@@ -24,14 +24,11 @@ class FacebookMessenger extends ChannelBase {
    *   The link field's renderable array.
    */
   public function render() {
-    // Facebook strips tracking parameters, so don't add them.
-    $url = $this->block->getUrl();
-
     return [
       'title' => $this->title(),
       'href' => 'fb-messenger://share',
       'query' => [
-        'link' => $url,
+        'link' => $this->generateShareUrl('fb_messenger_share'),
       ],
       'attributes' => [
         'title' => t('Share this via Facebook Messenger!'),
