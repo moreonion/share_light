@@ -214,7 +214,7 @@ class Block {
         if (empty($data['options']['subject'])) {
           unset($data['options']['subject']);
         }
-        if (count($instance['default_value'])) {
+        if (!empty($instance['default_value'])) {
           $data += $instance['default_value'][0];
         }
         if (empty($data['options']['subject'])) {
