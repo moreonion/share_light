@@ -5,9 +5,9 @@ namespace Drupal\share_light;
 use Upal\DrupalUnitTestCase;
 
 /**
- * Test the twitter share link.
+ * Test the WhatsApp share link.
  */
-class TwitterTest extends DrupalUnitTestCase {
+class WhatsAppTest extends DrupalUnitTestCase {
 
   /**
    * Create a mock block.
@@ -25,32 +25,28 @@ class TwitterTest extends DrupalUnitTestCase {
   }
 
   /**
-   * Test rendering the link with node.
+   * Test that the share URL is appended to the text if the token is missing.
    */
-  public function testRenderLink() {
-    $channel = new Twitter($this->mockBlock(), [
+  public function testShareUrlGetsAppended() {
+    $channel = new WhatsApp($this->mockBlock(), [
       'text' => 'Share text.',
     ]);
     $link = $channel->render();
     $text = $link['query']['text'];
-    $url = $link['query']['url'];
-    $this->assertNotEmpty($url);
-    $this->assertContains('node/mock-nid', $url);
-    $this->assertNotContains($url, $text);
-    $this->assertEqual('Share text.', $text);
+    $this->assertContains('node/mock-nid', $text);
   }
 
   /**
    * Test rendering the link with node when [share:url] is part of the text.
    */
   public function testRenderWithShareToken() {
-    $channel = new Twitter($this->mockBlock(), [
+    $channel = new WhatsApp($this->mockBlock(), [
       'text' => 'Text with [share:url].',
     ]);
     $link = $channel->render();
     $text = $link['query']['text'];
-    $url = $link['query']['url'];
-    $this->assertEmpty($url);
+    $this->assertContains('node/mock-nid', $text);
+    $this->assertEqual('.', substr($text, -1));
   }
 
 }

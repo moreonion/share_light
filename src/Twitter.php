@@ -52,7 +52,7 @@ class Twitter extends ChannelBase {
    */
   public function render() {
     $data = $this->generateTokenData('twitter_share');
-    $text_includes_url = strpos($this->options['text'], '[share:url]');
+    $text_includes_url = strpos($this->options['text'], '[share:url]') !== FALSE;
     $text = token_replace($this->options['text'], $data);
 
     return array(
