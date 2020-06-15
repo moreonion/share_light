@@ -10,9 +10,9 @@ use Upal\DrupalUnitTestCase;
 class TwitterTest extends DrupalUnitTestCase {
 
   /**
-   * Test rendering the link with node.
+   * Create a mock block.
    */
-  public function testRenderLink() {
+  protected function mockBlock() {
     $block = $this->createMock(Block::class);
     $node = (object) [
       'nid' => 42,
@@ -21,7 +21,14 @@ class TwitterTest extends DrupalUnitTestCase {
     $block->method('getLink')->willReturn([
       'path' => 'node/42',
     ]);
-    $channel = new Twitter($block, [
+    return $block;
+  }
+
+  /**
+   * Test rendering the link with node.
+   */
+  public function testRenderLink() {
+    $channel = new Twitter($this->mockBlock(), [
       'text' => 'Share text.',
     ]);
     $link = $channel->render();
@@ -37,15 +44,7 @@ class TwitterTest extends DrupalUnitTestCase {
    * Test rendering the link with node when [share:url] is part of the text.
    */
   public function testRenderWithShareToken() {
-    $block = $this->createMock(Block::class);
-    $node = (object) [
-      'nid' => 42,
-    ];
-    $block->method('getShareNode')->willReturn($node);
-    $block->method('getLink')->willReturn([
-      'path' => 'node/42',
-    ]);
-    $channel = new Twitter($block, [
+    $channel = new Twitter($this->mockBlock(), [
       'text' => 'Text with [share:url].',
     ]);
     $link = $channel->render();
