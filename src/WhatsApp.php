@@ -50,7 +50,11 @@ class WhatsApp extends ChannelBase {
    */
   public function render() {
     $data = $this->generateTokenData('whatsapp_share');
-    $text = token_replace($this->options['text'], $data);
+    $text = $this->options['text'];
+    if (strpos($text, '[share:url]') === FALSE) {
+      $text .= ' [share:url]';
+    }
+    $text = token_replace($text, $data);
 
     return [
       'title' => $this->title(),
