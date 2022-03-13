@@ -27,7 +27,7 @@ class EmailWebTest extends DrupalWebTestCase {
   /**
    * Sets up content types for the tests if not available.
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp(['share_light', 'node']);
 
     if ($this->profile != 'standard') {
