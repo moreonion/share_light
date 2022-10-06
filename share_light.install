@@ -107,6 +107,35 @@ function _share_light_default_channels() {
 }
 
 /**
+ * Allow proprietary share url protocols in links.
+ */
+function share_light_update_7201() {
+  $share_protocols = [
+    'fb-messenger',
+    'whatsapp',
+  ];
+  // Defaults copied from drupal_strip_dangerous_protocols().
+  $defaults = [
+    'ftp',
+    'http',
+    'https',
+    'irc',
+    'mailto',
+    'news',
+    'nntp',
+    'rtsp',
+    'sftp',
+    'ssh',
+    'tel',
+    'telnet',
+    'webcal',
+  ];
+  $allowed_protocols = variable_get('filter_allowed_protocols', $defaults);
+  $allowed_protocols = array_unique(array_merge($allowed_protocols, $share_protocols));
+  variable_set('filter_allowed_protocols', $allowed_protocols);
+}
+
+/**
  * Add text_format columns to share_light_email_settings.
  */
 function share_light_update_7101() {
