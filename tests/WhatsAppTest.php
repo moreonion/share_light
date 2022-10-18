@@ -33,7 +33,7 @@ class WhatsAppTest extends DrupalUnitTestCase {
     ]);
     $link = $channel->render();
     $text = $link['query']['text'];
-    $this->assertContains('node/mock-nid', $text);
+    $this->assertStringContainsString('node/mock-nid', $text);
   }
 
   /**
@@ -45,8 +45,20 @@ class WhatsAppTest extends DrupalUnitTestCase {
     ]);
     $link = $channel->render();
     $text = $link['query']['text'];
-    $this->assertContains('node/mock-nid', $text);
+    $this->assertStringContainsString('node/mock-nid', $text);
     $this->assertEqual('.', substr($text, -1));
+  }
+
+  /**
+   * Test rendering the link does not strip the protocol.
+   *
+   * Test that the 'filter_allowed_protocols' variable includes 'whatsapp'.
+   */
+  public function testRenderWithProtocol() {
+    $channel = new WhatsApp($this->mockBlock());
+    $link = $channel->render();
+    $rendered_link = l($link['title'], $link['href'], $link);
+    $this->assertStringContainsString($link['href'], $rendered_link);
   }
 
 }

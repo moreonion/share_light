@@ -65,6 +65,7 @@ function share_light_install() {
   $field->save();
 
   variable_set('share_light_channels_enabled', _share_light_default_channels());
+  _share_light_add_protocols();
 }
 
 function share_light_uninstall() {
@@ -104,6 +105,42 @@ function _share_light_default_channels() {
   }
   $channels['pinterest'] = 0;
   return $channels;
+}
+
+/**
+ * Add proprietary share url protocols to allowed protocols.
+ */
+function _share_light_add_protocols() {
+  $share_protocols = [
+    'fb-messenger',
+    'whatsapp',
+  ];
+  // Defaults copied from drupal_strip_dangerous_protocols().
+  $defaults = [
+    'ftp',
+    'http',
+    'https',
+    'irc',
+    'mailto',
+    'news',
+    'nntp',
+    'rtsp',
+    'sftp',
+    'ssh',
+    'tel',
+    'telnet',
+    'webcal',
+  ];
+  $allowed_protocols = variable_get('filter_allowed_protocols', $defaults);
+  $allowed_protocols = array_unique(array_merge($allowed_protocols, $share_protocols));
+  variable_set('filter_allowed_protocols', $allowed_protocols);
+}
+
+/**
+ * Allow proprietary share url protocols in links.
+ */
+function share_light_update_7201() {
+  _share_light_add_protocols();
 }
 
 /**

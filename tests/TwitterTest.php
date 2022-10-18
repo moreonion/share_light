@@ -35,8 +35,8 @@ class TwitterTest extends DrupalUnitTestCase {
     $text = $link['query']['text'];
     $url = $link['query']['url'];
     $this->assertNotEmpty($url);
-    $this->assertContains('node/mock-nid', $url);
-    $this->assertNotContains($url, $text);
+    $this->assertStringContainsString('node/mock-nid', $url);
+    $this->assertStringNotContainsString($url, $text);
     $this->assertEqual('Share text.', $text);
   }
 

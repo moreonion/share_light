@@ -34,26 +34,26 @@ class ShareUrlTest extends \DrupalUnitTestCase {
     $this->assertEquals('node/' . $node->nid . '/share', $email['href']);
     $this->assertEquals('/node/' . $node->nid, $email['query']['path']);
     $this->assertEquals('https://www.facebook.com/sharer.php', $fb['href']);
-    $this->assertContains('node/' . $node->nid, $fb['query']['u']);
+    $this->assertStringContainsString('node/' . $node->nid, $fb['query']['u']);
 
     $this->assertEquals('http://twitter.com/share', $twitter['href']);
-    $this->assertContains('node/' . $node->nid, $twitter['query']['text']);
-    $this->assertContains('utm_campaign=%5B' . $node->nid . '%5D', $twitter['query']['text']);
+    $this->assertStringContainsString('node/' . $node->nid, $twitter['query']['text']);
+    $this->assertStringContainsString('utm_campaign=%5B' . $node->nid . '%5D', $twitter['query']['text']);
 
     $this->assertEquals('fb-messenger://share', $fb_msg['href']);
     $this->assertEquals(TRUE, $fb_msg['external']);
-    $this->assertContains('node/' . $node->nid, $fb_msg['query']['link']);
+    $this->assertStringContainsString('node/' . $node->nid, $fb_msg['query']['link']);
 
     $this->assertEquals('whatsapp://send', $whatsapp['href']);
     $this->assertEquals(TRUE, $whatsapp['external']);
-    $this->assertContains('node/' . $node->nid, $whatsapp['query']['text']);
-    $this->assertContains('utm_campaign=%5B' . $node->nid . '%5D', $whatsapp['query']['text']);
+    $this->assertStringContainsString('node/' . $node->nid, $whatsapp['query']['text']);
+    $this->assertStringContainsString('utm_campaign=%5B' . $node->nid . '%5D', $whatsapp['query']['text']);
 
     $this->assertEquals('mailto:', $mailto['href']);
     $this->assertEquals(TRUE, $mailto['external']);
-    $this->assertContains($node->title, $mailto['query']['subject']);
-    $this->assertContains('node/' . $node->nid, $mailto['query']['body']);
-    $this->assertContains('utm_campaign=%5B' . $node->nid . '%5D', $mailto['query']['body']);
+    $this->assertStringContainsString($node->title, $mailto['query']['subject']);
+    $this->assertStringContainsString('node/' . $node->nid, $mailto['query']['body']);
+    $this->assertStringContainsString('utm_campaign=%5B' . $node->nid . '%5D', $mailto['query']['body']);
   }
 
 }
