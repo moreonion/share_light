@@ -45,7 +45,7 @@ class Twitter extends ChannelBase {
   }
 
   /**
-   * Returns a link field containing a link to `http://twitter.com/share`.
+   * Returns a link field containing a link to `https://twitter.com/intent/tweet`.
    *
    * @return array
    *   The link field's renderable array.
@@ -57,7 +57,7 @@ class Twitter extends ChannelBase {
 
     return array(
       'title' => $this->title(),
-      'href' => 'http://twitter.com/share',
+      'href' => 'https://twitter.com/intent/tweet',
       'query' => [
         'text' => $text,
         'url' => !$text_includes_url ? $this->generateShareUrl('twitter_share') : '',
