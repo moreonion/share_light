@@ -3,7 +3,7 @@
 namespace Drupal\share_light;
 
 /**
- * A channel for sharing via Twitter.
+ * A channel for sharing via Twitter / X.
  */
 class Twitter extends ChannelBase {
 
@@ -11,10 +11,10 @@ class Twitter extends ChannelBase {
    * Returns the channel's name.
    *
    * @return string
-   *   Returns t('Twitter').
+   *   Returns t('Twitter / X').
    */
   public static function title() {
-    return t('Twitter');
+    return t('Twitter / X');
   }
 
   /**
@@ -25,16 +25,16 @@ class Twitter extends ChannelBase {
   }
 
   /**
-   * Adds configuration options for the `Twitter` channel to the field widget.
+   * Adds configuration options for the `Twitter / X` channel to the field widget.
    *
-   * Allows the user to enter a default Tweet text.
+   * Allows the user to enter a default post text.
    */
   public static function optionsWidget(array &$element, array $options) {
     $title = static::title();
     $element['text'] = array(
-      '#title' => t('Tweet text for @title.', ['@title' => $title]),
-      '#description' => t('Tweet text for @title.', ['@title' => $title]),
-      // 256 = 280 - 1 - 23 (tweet max-length - space - url in https)
+      '#title' => t('Post text for @title.', ['@title' => $title]),
+      '#description' => t('Post text for @title.', ['@title' => $title]),
+      // 256 = 280 - 1 - 23 (post max-length - space - url in https)
       '#maxlength' => 256,
       '#type' => 'textarea',
       '#cols' => 60,
@@ -45,7 +45,7 @@ class Twitter extends ChannelBase {
   }
 
   /**
-   * Returns a link field containing a link to `https://twitter.com/intent/tweet`.
+   * Returns a link field containing a link to `https://x.com/intent/post`.
    *
    * @return array
    *   The link field's renderable array.
@@ -57,14 +57,14 @@ class Twitter extends ChannelBase {
 
     return array(
       'title' => $this->title(),
-      'href' => 'https://twitter.com/intent/tweet',
+      'href' => 'https://x.com/intent/post',
       'query' => [
         'text' => $text,
         'url' => !$text_includes_url ? $this->generateShareUrl('twitter_share') : '',
       ],
       'attributes' => array(
-        'title' => t('Share this via Twitter!'),
-        'data-share' => 'twitter',
+        'title' => t('Share this via Twitter / X!'),
+        'data-share' => 'x',
         'target' => '_blank',
       ),
     );
