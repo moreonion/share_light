@@ -36,7 +36,7 @@ class ShareUrlTest extends \DrupalUnitTestCase {
     $this->assertEquals('https://www.facebook.com/sharer.php', $fb['href']);
     $this->assertStringContainsString('node/' . $node->nid, $fb['query']['u']);
 
-    $this->assertEquals('https://twitter.com/intent/tweet', $twitter['href']);
+    $this->assertEquals('https://x.com/intent/post', $twitter['href']);
     $this->assertStringContainsString('node/' . $node->nid, $twitter['query']['text']);
     $this->assertStringContainsString('utm_campaign=%5B' . $node->nid . '%5D', $twitter['query']['text']);
 
